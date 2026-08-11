@@ -22,3 +22,7 @@ dati_elezioni/
 .DS_Store
 .github/
 
+
+# interni (non pubblici: path del server)
+prompt-migliorie.md
+evals/
