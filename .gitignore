@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Dati scaricati (mai versionare gli output)
+dati_elezioni/
+*.csv
+!tests/**/*.csv
+!examples/**/*.csv
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store

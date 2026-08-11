@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "estrattore-elezioni-italiane"
+version = "1.0.0"
+description = "Estrazione della serie storica elettorale italiana dall'Archivio Storico del Ministero dell'Interno (elezionistorico.interno.gov.it, 1946-oggi)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Jacopo Peracchio" }]
+keywords = ["elezioni", "italia", "ministero-interno", "dait", "scraper", "open-data"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Sociology",
+    "Topic :: Utilities",
+]
+dependencies = ["requests>=2.28"]
+
+[project.scripts]
+estrattore-elezioni = "estrattore_elezioni.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
