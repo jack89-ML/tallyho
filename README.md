@@ -56,7 +56,7 @@ cinquant'anni di elezioni un giorno alla volta.
 ## Installazione
 
 ```bash
-git clone <questo-repo>
+git clone https://github.com/jack89-ML/tallyho
 cd tallyho
 python3 -m venv .venv
 .venv/bin/pip install -e .
@@ -295,7 +295,7 @@ tallyho/
 │   ├── __init__.py      # API pubblica
 │   ├── __main__.py      # python -m tallyho
 │   ├── cli.py           # console script
-│   └── estrattore.py    # logica: decodifica, navigazione, parsing
+│   └── tallyho.py      # logica: decodifica, navigazione, parsing
 ├── tests/               # test unitari (decodifica, parsing — senza rete)
 ├── examples/            # esempi di output
 ├── pyproject.toml
