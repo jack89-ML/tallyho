@@ -1,6 +1,6 @@
-# tallyho-italiane
+# TallyHo
 
-**TallyHo** ti porta a spasso nella storia elettorale italiana — dal 1946
+**TallyHo** ti porta a spasso nella storia elettorale — dal 1946
 a oggi, comune per comune, senza un solo click a mano.
 
 L'[Archivio Storico delle Elezioni](https://elezionistorico.interno.gov.it)
@@ -14,12 +14,18 @@ li consegna in **CSV** e **JSON**, pronti per l'analisi.
 
 ## Perché esiste
 
-- Il progetto [mevalerio/Eligendo-Downloader](https://github.com/mevalerio/Eligendo-Downloader)
-  è uno **stub** (nessuna chiamata alle API reali, dati demo locali).
-- Le API JSON del portale risultati 2026 (`elezioni.interno.gov.it`) non
-  sono interrogabili direttamente (la SPA cattura tutte le route).
-- L'archivio storico funziona ed è l'unica fonte ufficiale completa
-  (elezioni comunali dal 1970, politiche dal 1946).
+L'Archivio Storico delle Elezioni è la fonte ufficiale più completa in
+assoluto (elezioni comunali dal 1970, politiche dal 1946), ma è pensato
+per la consultazione visiva, non per il download: ogni comune, ogni data
+e ogni livello territoriale richiedono una sequenza di clic su un form
+JavaScript a più passi. Con oltre 160 date possibili per le sole comunali,
+ricostruire a mano la storia elettorale di un comune significa migliaia di
+interazioni ripetitive. TallyHo nasce per automatizzare quel percorso:
+prende ciò che il sito espone (le stesse chiamate che fa il browser) e lo
+trasforma in un dataset strutturato (CSV + JSON), pronto per analisi,
+visualizzazioni e ricerche. Uno strumento per chi studia il voto — dal
+singolo ricercatore al giornalista di dati — senza dover cliccare
+cinquant'anni di elezioni un giorno alla volta.
 
 ## Funzionalità
 
@@ -47,7 +53,7 @@ li consegna in **CSV** e **JSON**, pronti per l'analisi.
 
 ```bash
 git clone <questo-repo>
-cd tallyho-italiane
+cd tallyho
 python3 -m venv .venv
 .venv/bin/pip install -e .
 ```
@@ -280,7 +286,7 @@ per il periodo 1970-1985).
 ## Struttura del progetto
 
 ```
-tallyho-italiane/
+tallyho/
 ├── src/tallyho/
 │   ├── __init__.py      # API pubblica
 │   ├── __main__.py      # python -m tallyho

@@ -1,0 +1,54 @@
+## 1) VALUTAZIONE
+
+**Punti di forza**
+- Il concept è chiaro e interessante: unisce **voto/spoglio** con un immaginario visivo dinamico tipo **seggiovia/montagna**, dando un’idea di movimento, conteggio e risultato.
+- La **palette è definita** e coerente: blu notte, bianco, rosso e due verdi offrono buon contrasto potenziale.
+- Lo stile richiesto è adatto a un logo: **flat vector, niente gradienti, niente ombre, niente foto**.
+- Il formato quadrato 1024x1024 è corretto per app icon/emblema.
+- La richiesta finale di avere solo “TallyHo” e nessun sottotitolo aiuta a ridurre il rumore visivo.
+
+**Debolezze principali**
+- Il prompt contiene **troppi elementi narrativi**: montagna, due funi, tre cabine-urna, scheda elettorale, matita rossa, barre di spoglio, testo “VOTI” sulle urne, wordmark, punto esclamativo/matita. Per un logo è eccessivo.
+- La scritta **“VOTI” sulle urne** entra in conflitto con la richiesta “niente altro testo nella scena”. Inoltre i modelli text-to-image tendono a sbagliare molto facilmente testi piccoli e secondari.
+- Le **urne-cabina** rischiano di non essere leggibili: una scatola bianca con fessura verticale, se molto piccola, può sembrare un generico rettangolo o un contenitore non riconoscibile.
+- Le **due funi diagonali** possono creare confusione grafica, soprattutto in formato ridotto. Una fune singola è più pulita e più iconica.
+- La scheda elettorale con matita e barre verdi in alto a destra introduce un **secondo punto focale** che compete con la scena principale e con il wordmark.
+- Il “punto esclamativo stilizzato come una matita” è rischioso: non fa parte di “TallyHo”, può generare errori di rendering e aggiungere un elemento non necessario.
+- C’è ambiguità tipografica: il prompt chiede lettere maiuscole bold, ma poi indica “TallyHo” con H maiuscola nel mezzo. Se il modello interpreta tutto maiuscolo, potrebbe produrre “TALLYHO” invece del desired mixed-case.
+
+**Rischi concreti**
+- **Testo leggibile**: il rischio maggiore è che il modello generi “TallyHo” storpiato, con lettere doppie, mancanti, invertite o con spazi errati. Più testo aggiungi, più il rischio aumenta.
+- **Micro-testo**: la scritta “VOTI” sulle urne sarà quasi certamente illeggibile o malformata.
+- **Scala**: a dimensione favicon o icona piccola, tre urne con fessura, scheda, matita, barre e montagna diventeranno rumore. Il logo deve funzionare prima a 32px, poi a 1024px.
+- **Geometrie**: le cabine appese alla fune potrebbero risultare storte, sovrapposte o poco ancorate. Le barre verdi potrebbero sembrare elementi casuali se non ben allineate.
+- **Contrasto**: il verde scuro `#1E6B4E` su blu notte `#0F1B2D` può risultare troppo chiuso. Meglio usare il verde chiaro come colore dominante o aumentare la distinzione tra montagna e sfondo.
+- **Composizione**: la scena rischia di essere troppo “illustrativa” e poco “logo”. Serve una sintesi più forte.
+
+**Sintesi della direzione consigliata**
+Mantenere l’idea principale — montagna, cable car/urna, spoglio — ma semplificare drasticamente: una sola fune, urne senza testo, scheda/matita ridotte a micro-icona pulita, wordmark grande e centrale. Rimuovere il punto esclamativo e qualsiasi scritta secondaria.
+
+---
+
+## 2) PROMPT FINALE
+
+```text
+Square modern flat vector logo emblem, app icon format, 1:1 aspect ratio, 1024x1024, professional brand identity design.
+
+Background: deep night blue, exact color #0F1B2D, clean and solid.
+
+Composition: upper two-thirds of the image contains a minimal geometric scene. A stylized mountain made of clean stepped terraces rises toward the right, using dark green #1E6B4E and light green #3E9B6E. The mountain silhouette must be bold, simple, and readable even at small size.
+
+A single strong diagonal cable line rises from lower left to upper right. Three identical minimalist cable cars hang evenly along the cable. Each cable car is designed like a simplified ballot box: a compact white rectangular box, exact color #FFFFFF, with one clear vertical ballot slot on the front and a simple hanging connector to the cable. The ballot-box cars must be recognizable but extremely clean. No text, no letters, no labels, no symbols on the boxes.
+
+Near the summit, place one very small minimal white ballot card icon. On the card, three vertical green tally bars of increasing height, using #3E9B6E, and one slim red diagonal pencil accent in #E63946. This element must be tiny, crisp, and secondary, not overcrowded.
+
+Lower third of the image: large centered typographic wordmark. The only visible text in the entire image is exactly:
+
+TallyHo
+
+Exact spelling and capitalization: first letter T uppercase, then lowercase letters a-l-l-y, then H uppercase, then lowercase o. The wordmark must be rendered in a bold geometric sans-serif typeface, clean and modern, with crisp letterforms and generous letter spacing. The wordmark is pure white #FFFFFF, except the first letter “T” and the letter “H” are red #E63946. The wordmark is on one single line, tightly connected, horizontally centered, highly legible, and occupies most of the width of the logo.
+
+No subtitle. No punctuation. No exclamation mark. No extra words. No additional text. No watermark. No logo mockup. No gradients. No shadows. No outlines. No textures. No photorealism. No 3D. No handwriting. No busy details. No tiny captions.
+
+Style: flat 2D vector logo, solid colors only, precise geometry, balanced negative space, safe margins, high contrast, scalable favicon-friendly brand mark.
+```

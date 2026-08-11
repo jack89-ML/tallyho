@@ -1,0 +1,15 @@
+PROMPT LOGO TALLYHO (versione agente)
+
+Emblema/app-icon quadrato (1024x1024), stile flat vector moderno, sfondo blu notte profondo (#0F1B2D).
+
+SCENA: una seggiovia stilizzata su una montagna: due funi diagonali che salgono da sinistra in basso a destra in alto; tre cabine a forma di URNA ELETTORALE (scatola bianca con fessura verticale al centro e la scritta "VOTI" sulla fiancata), collegate alla fune, che salgono verso una vetta. La montagna è una sagoma geometrica a gradoni in verde scuro (#1E6B4E) e verde chiaro (#3E9B6E). In alto a destra, sopra la vetta, una scheda elettorale bianca stilizzata con una MATITA ROSSA inclinata che traccia una barra di spoglio crescente (barre verdi di altezze diverse).
+
+TESTO: sotto la scena, il nome "TallyHo" in lettere maiuscole bold, font geometrico sans-serif, bianco puro (#FFFFFF), con la "T" e la "H" in rosso (#E63946) e un punto esclamativo stilizzato come una matita. Sotto il nome, il sottotitolo "STELLARE ELETTORALE" NO — niente sottotitolo, solo "TallyHo".
+
+DETTAGLI:
+- palette: blu notte (#0F1B2D), bianco (#FFFFFF), rosso (#E63946), verde (#1E6B4E e #3E9B6E)
+- forme pulite, niente gradienti, niente ombre, niente foto, flat 2D
+- le urne sono riconoscibili come urne elettorali (fessura verticale)
+- testo "TallyHo" esattamente così, tutto attaccato, H maiuscola nel mezzo
+- niente altro testo nella scena, nessun'altra scritta
+- proporzioni bilanciate, il logo funziona anche piccolo (favicon)

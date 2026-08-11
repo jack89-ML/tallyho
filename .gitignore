@@ -21,3 +21,6 @@ dati_elezioni/
 .idea/
 .DS_Store
 .github/
+
+# logo definitivo (generato dall utente)
+assets/*.png
