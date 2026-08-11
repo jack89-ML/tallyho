@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tallyho"
 version = "1.0.0"
-description = "TallyHo — ti porta a spasso nella storia elettorale. Scende la gerarchia dell'Archivio Storico delle Elezioni (elezionistorico.interno.gov.it, 1946-oggi) per ogni data disponibile e ti consegna la serie storica completa di un comune in CSV e JSON, senza un solo click a mano."
+description = "TallyHo — ti porta a spasso nella storia elettorale italiana. Scende la gerarchia dell'Archivio Storico delle Elezioni (elezionistorico.interno.gov.it, 1946-oggi) per ogni data disponibile e ti consegna la serie storica completa di un comune in CSV e JSON, senza un solo click a mano."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }

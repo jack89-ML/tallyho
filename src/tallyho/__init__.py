@@ -1,4 +1,4 @@
-"""TallyHo — serie storica elettorale dall'Archivio Storico DAIT."""
+"""TallyHo — serie storica elettorale italiana dall'Archivio Storico DAIT."""
 
 __version__ = "1.0.0"
 

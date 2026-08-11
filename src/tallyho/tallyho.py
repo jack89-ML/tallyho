@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-tallyho.py — TallyHo: ti porta a spasso nella storia elettorale.
+tallyho.py — TallyHo: ti porta a spasso nella storia elettorale italiana.
 
 Fonte: https://elezionistorico.interno.gov.it (1946-oggi)
 Licenza: MIT
@@ -548,7 +548,7 @@ def scarica_ammcom():
 
 def main():
     ap = argparse.ArgumentParser(
-        description="TallyHo — ti porta a spasso nella storia elettorale "
+        description="TallyHo — ti porta a spasso nella storia elettorale italiana "
                     "(Archivio Storico DAIT, 1946-oggi)")
     ap.add_argument("--comuni",
                     help="Comuni da cercare, separati da virgola (es. ROMA,MILANO)")

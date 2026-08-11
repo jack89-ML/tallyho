@@ -1,6 +1,6 @@
 # TallyHo
 
-**TallyHo** ti porta a spasso nella storia elettorale — dal 1946
+**TallyHo** ti porta a spasso nella storia elettorale italiana — dal 1946
 a oggi, comune per comune, senza un solo click a mano.
 
 L'[Archivio Storico delle Elezioni](https://elezionistorico.interno.gov.it)
