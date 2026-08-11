@@ -22,5 +22,3 @@ dati_elezioni/
 .DS_Store
 .github/
 
-# logo definitivo (generato dall utente)
-assets/*.png

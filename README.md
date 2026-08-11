@@ -1,5 +1,9 @@
 # TallyHo
 
+<p align="center">
+  <img src="assets/logo_tallyho.png" alt="TallyHo" width="320">
+</p>
+
 **TallyHo** ti porta a spasso nella storia elettorale italiana — dal 1946
 a oggi, comune per comune, senza un solo click a mano.
 
