@@ -14,8 +14,8 @@ def test_decodifica_opzione_provincia():
 
 
 def test_decodifica_opzione_comune():
-    # il valore dopo "lev3" è il suffisso (230), non "3230"
-    assert decodifica_opzione("970230-lev3230") == ("970230", "lev3", "230")
+    # il valore è tutto ciò che segue "lev3" (es. "53012"), non il codice intero
+    assert decodifica_opzione("53012-lev353012") == ("53012", "lev3", "53012")
 
 
 def test_decodifica_opzione_roma():

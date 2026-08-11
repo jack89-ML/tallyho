@@ -24,11 +24,11 @@ sessione HTTP, scende lungo la gerarchia fino ai comuni richiesti e salva
 i risultati in CSV e JSON.
 
 Uso:
-    python3 estrattore_elezioni.py                       # comunali, Calabria, i 3 comuni
-    python3 estrattore_elezioni.py --comuni SAVELLI --tipo G
-    python3 estrattore_elezioni.py --regione CALABRIA --province CROTONE,COSENZA
-    python3 estrattore_elezioni.py --out ./dati --sleep 1.5
-    python3 estrattore_elezioni.py --comuni SAVELLI --solo-ultima-data
+    estrattore-elezioni --comuni ROMA,MILANO                 # serie storica
+    estrattore-elezioni --comuni ROMA --tipo G               # solo comunali
+    estrattore-elezioni --comuni ROMA --regione 12-lev112 --nome-regione LAZIO
+    estrattore-elezioni --comuni ROMA --out ./dati --sleep 1.5
+    estrattore-elezioni --comuni ROMA --solo-ultima-data     # test rapido
 """
 
 import argparse
@@ -46,9 +46,6 @@ import requests
 BASE = "https://elezionistorico.interno.gov.it/index.php"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
-
-# Codici DAIT (anagrafe amministratori): regione Calabria = 18
-REGIONE_CALABRIA = "18-lev118"
 
 # --------------------------------------------------------------------------
 # Decodifica dei valori delle <option> (replica esatta della funzione JS
@@ -147,7 +144,7 @@ def trova_comune(sessione, data, comune_target, tipo, regione_value,
     dinamico, adattandosi al tipo di elezione:
       - comunali/regionali: area Italia -> regione (-> provincia -> comune)
       - politiche (C/S): area Italia -> circoscrizione (testo == nome
-        regione, es. CALABRIA) -> provincia -> comune
+        regione) -> provincia -> comune
       - regionali: la discesa si ferma alla regione (niente provincia)
     Ritorna (html_risultati, contesto) se l'area ha votato, altrimenti
     (None, None).
@@ -194,7 +191,7 @@ def trova_comune(sessione, data, comune_target, tipo, regione_value,
         scelte_prov = [(v, t) for v, t in province
                        if t.upper() in province_target]
         if not scelte_prov:
-            # gerarchia diversa (es. collegi plurinominali "CALABRIA - P01"):
+            # gerarchia diversa (es. collegi plurinominali "LAZIO - P01"):
             # prova tutte le opzioni finché il comune compare al livello 4
             scelte_prov = province
         pp_prov, pv_prov = leggi_onchange(html_p, "sel_sezione3")
@@ -441,18 +438,21 @@ def integra_dait(csv_path, comuni):
 def main():
     ap = argparse.ArgumentParser(
         description="Estrazione storico elettorale da elezionistorico.interno.gov.it")
-    ap.add_argument("--comuni", default="SAVELLI,VERZINO,CAMPANA",
-                    help="Comuni da cercare (virgola, default i 3 del caso)")
-    ap.add_argument("--regione", default="18-lev118",
-                    help="Valore option della regione (default Calabria)")
-    ap.add_argument("--nome-regione", default="CALABRIA",
+    ap.add_argument("--comuni", required=True,
+                    help="Comuni da cercare, separati da virgola (es. ROMA,MILANO)")
+    ap.add_argument("--regione", default="12-lev112",
+                    help="Valore option della regione (es. Lazio = 12-lev112). "
+                         "Si legge ispezionando il <select> Regione del sito "
+                         "(vedi README, sezione 'Come trovare i valori')")
+    ap.add_argument("--nome-regione", default="LAZIO",
                     help="Testo della regione/circoscrizione da cercare "
-                         "(default CALABRIA; per le elezioni politiche la "
-                         "circoscrizione ha lo stesso nome)")
-    ap.add_argument("--province", default="CROTONE,COSENZA,CATANZARO",
-                    help="Province ammesse (default CROTONE,COSENZA,CATANZARO: "
-                         "i comuni dell'attuale Crotone erano in provincia di "
-                         "Catanzaro prima del 1992)")
+                         "(per le elezioni politiche la circoscrizione ha lo "
+                         "stesso nome della regione)")
+    ap.add_argument("--province", default="ROMA",
+                    help="Province ammesse (virgola). Per i comuni di province "
+                         "istituite dopo il 1992, indicare anche la provincia "
+                         "storica per coprire le elezioni precedenti "
+                         "(es. --province CROTONE,CATANZARO)")
     ap.add_argument("--tipo", default="G",
                     help="Tipo elezione: G=comunali (default), C=camera, S=senato, "
                          "E=europee, F=referendum, R=regionali, P=provinciali, A=costituente")

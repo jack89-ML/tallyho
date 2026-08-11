@@ -2,14 +2,14 @@
 
 from estrattore_elezioni import parse_risultati
 
-# Pagina comunale moderna (14/05/2023 Savelli, semplificata ma fedele)
+# Pagina comunale moderna (26/05/2019, semplificata ma fedele al formato)
 HTML_MODERNO = """
 <html><body>
-<h3>Comunali 14/05/2023 Area ITALIA Regione CALABRIA Provincia CROTONE Comune SAVELLI</h3>
+<h3>Comunali 26/05/2019 Area ITALIA Regione TOSCANA Provincia SIENA Comune MONTEPULCIANO</h3>
 <table class="dati_riepilogo">
 <tr><th>Affluenza</th></tr>
-<tr><td>Elettori</td><td>1.662</td><td></td></tr>
-<tr><td>Votanti</td><td>819</td><td>49,28 %</td></tr>
+<tr><td>Elettori</td><td>2.345</td><td></td></tr>
+<tr><td>Votanti</td><td>1.203</td><td>51,30 %</td></tr>
 </table>
 <table class="dati_riepilogo">
 <tr><th>Schede</th></tr>
@@ -18,23 +18,23 @@ HTML_MODERNO = """
 </table>
 <table>
 <tr><th>Candidati e Liste/Gruppi</th><th></th><th></th><th>Voti</th><th>%</th><th>Seggi</th></tr>
-<tr><td>SPINA FRANCESCO</td><td>Eletto sind.</td><td></td><td></td><td>415</td><td>51,23</td><td></td></tr>
-<tr><td></td><td>RICOMINCIAMO</td><td></td><td></td><td></td><td>415</td><td>51,23</td><td>7</td></tr>
-<tr><td>FRONTERA DOMENICO</td><td></td><td></td><td></td><td>395</td><td>48,77</td><td></td></tr>
-<tr><td></td><td>L'ALVEARE SAVELLI A LAVORO</td><td></td><td></td><td></td><td>395</td><td>48,77</td><td>3</td></tr>
-<tr><td>TOTALE</td><td>CANDIDATI</td><td></td><td></td><td>810</td><td></td><td></td></tr>
+<tr><td>BIANCHI MARIO</td><td>Eletto sind.</td><td></td><td></td><td>618</td><td>51,42</td><td></td></tr>
+<tr><td></td><td>INNOVAZIONE</td><td></td><td></td><td></td><td>618</td><td>51,42</td><td>7</td></tr>
+<tr><td>ROSSI LUIGI</td><td></td><td></td><td></td><td>582</td><td>48,58</td><td></td></tr>
+<tr><td></td><td>UNIONE CIVICA</td><td></td><td></td><td></td><td>582</td><td>48,58</td><td>3</td></tr>
+<tr><td>TOTALE</td><td>CANDIDATI</td><td></td><td></td><td>1.200</td><td></td><td></td></tr>
 </table>
 </body></html>
 """
 
-# Pagina storica (07/06/1970, sindaco eletto dal consiglio: sole liste)
+# Pagina storica (08/06/1980, sindaco eletto dal consiglio: sole liste)
 HTML_STORICO = """
 <html><body>
-<h3>Comunali 07/06/1970 Area ITALIA Regione CALABRIA Provincia COSENZA Comune CAMPANA</h3>
+<h3>Comunali 08/06/1980 Area ITALIA Regione TOSCANA Provincia SIENA Comune PIENZA</h3>
 <table class="dati_riepilogo">
 <tr><th>Affluenza</th></tr>
-<tr><td>Elettori</td><td>2.339</td><td></td></tr>
-<tr><td>Votanti</td><td>1.778</td><td>76,02 %</td></tr>
+<tr><td>Elettori</td><td>1.987</td><td></td></tr>
+<tr><td>Votanti</td><td>1.512</td><td>76,10 %</td></tr>
 </table>
 <table class="dati_riepilogo">
 <tr><th>Schede</th></tr>
@@ -43,9 +43,9 @@ HTML_STORICO = """
 </table>
 <table>
 <tr><th>Liste/Gruppi</th><th>Voti</th><th>%</th><th>Seggi</th></tr>
-<tr><td></td><td>DC</td><td>923</td><td>54,23</td><td>16</td></tr>
-<tr><td></td><td>ETEROGENEE</td><td>779</td><td>45,77</td><td>4</td></tr>
-<tr><td>TOTALI</td><td></td><td>1.702</td><td></td><td>20</td></tr>
+<tr><td></td><td>DC</td><td>812</td><td>53,98</td><td>16</td></tr>
+<tr><td></td><td>PSI</td><td>700</td><td>46,02</td><td>4</td></tr>
+<tr><td>TOTALI</td><td></td><td>1.512</td><td></td><td>20</td></tr>
 </table>
 </body></html>
 """
@@ -53,33 +53,33 @@ HTML_STORICO = """
 
 def test_parse_moderno():
     r = parse_risultati(HTML_MODERNO)
-    assert r["elettori"] == 1662
-    assert r["votanti"] == 819
-    assert r["affluenza_pct"] == 49.28
+    assert r["elettori"] == 2345
+    assert r["votanti"] == 1203
+    assert r["affluenza_pct"] == 51.30
     assert r["bianche"] == 3
     assert r["non_valide"] == 9
     assert len(r["candidati"]) == 2
-    spina, frontera = r["candidati"]
-    assert spina["candidato"] == "SPINA FRANCESCO"
-    assert spina["eletto"] is True
-    assert spina["voti_candidato"] == 415
-    assert spina["pct_candidato"] == 51.23
-    assert spina["liste"][0]["lista"] == "RICOMINCIAMO"
-    assert spina["liste"][0]["seggi"] == 7
-    assert frontera["eletto"] is False
-    assert frontera["liste"][0]["seggi"] == 3
+    bianchi, rossi = r["candidati"]
+    assert bianchi["candidato"] == "BIANCHI MARIO"
+    assert bianchi["eletto"] is True
+    assert bianchi["voti_candidato"] == 618
+    assert bianchi["pct_candidato"] == 51.42
+    assert bianchi["liste"][0]["lista"] == "INNOVAZIONE"
+    assert bianchi["liste"][0]["seggi"] == 7
+    assert rossi["eletto"] is False
+    assert rossi["liste"][0]["seggi"] == 3
 
 
 def test_parse_storico():
     r = parse_risultati(HTML_STORICO)
-    assert r["elettori"] == 2339
-    assert r["affluenza_pct"] == 76.02
+    assert r["elettori"] == 1987
+    assert r["affluenza_pct"] == 76.10
     assert len(r["candidati"]) == 2
-    dc, eterogenee = r["candidati"]
+    dc, psi = r["candidati"]
     assert dc["candidato"] is None  # formato storico: solo liste
     assert dc["liste"][0]["lista"] == "DC"
-    assert dc["liste"][0]["voti"] == 923
-    assert dc["liste"][0]["pct"] == 54.23
+    assert dc["liste"][0]["voti"] == 812
+    assert dc["liste"][0]["pct"] == 53.98
     assert dc["liste"][0]["seggi"] == 16
 
 

@@ -7,7 +7,7 @@ Ministero dell'Interno (DAIT) — copertura dal **1946 a oggi**.
 Il sito ufficiale è navigabile solo tramite un form JavaScript a più passi
 (data → area → regione → … → comune). Questo strumento riproduce
 esattamente quella sequenza di chiamate (decodificando i valori compatti
-delle `<option>`, es. `18-lev118` → `ne1=18&lev1=18`) e salva i risultati
+delle `<option>`, es. `12-lev112` → `ne1=12&lev1=12`) e salva i risultati
 in **CSV** e **JSON**.
 
 ## Perché esiste
@@ -28,13 +28,13 @@ in **CSV** e **JSON**.
 - [x] Discesa gerarchica dinamica: regione → provincia → comune (comunali),
       regione con risultati a quel livello (regionali), circoscrizione →
       collegi plurinominali/uninominali (politiche post-2017)
-- [x] Gestione automatica delle province storiche (i comuni oggi in provincia
-      di Crotone risultavano in provincia di Catanzaro prima del 1992)
-- [x] Formato risultati moderno (candidati sindaco + liste) e storico
-      (sole liste, sindaco eletto dal consiglio)
+- [x] Gestione automatica delle province storiche (i comuni di una provincia
+      istituita nel 1992 risultavano nella provincia originaria per le
+      elezioni precedenti)
+- [x] Formato risultati moderno (candidati + liste) e storico
+      (sole liste, amministratori eletti dal consiglio)
 - [x] Export CSV (delimitatore `;`, UTF-8 BOM per Excel) e JSON
-- [x] Integrazione open data DAIT (`--dait`): amministratori in carica nel JSON
-- [x] Ripresa dei run interrotti (i file già scaricati vengono registrati)
+- [x] Integrazione anagrafe amministratori DAIT (`--dait`)
 - [x] Rispetto del server: pausa configurabile tra le richieste
 
 ## Installazione
@@ -56,39 +56,36 @@ pytest
 ## Uso
 
 ```bash
-# Serie storica comunale dei 3 comuni del caso (Calabria)
-estrattore-elezioni --comuni SAVELLI,VERZINO,CAMPANA
+# Serie storica comunale (es. Roma e Milano)
+estrattore-elezioni --comuni ROMA,MILANO
 
 # Equivalente via python -m
-python -m estrattore_elezioni --comuni SAVELLI,VERZINO,CAMPANA
-
-# Altro comune, altra regione (Lazio: valore option 12-lev112, nome ROMA)
-estrattore-elezioni --comuni ROMA --regione 12-lev112 --nome-regione LAZIO --province ROMA
+python -m estrattore_elezioni --comuni ROMA,MILANO
 
 # Solo una data (test rapido)
-estrattore-elezioni --comuni SAVELLI --data 14/05/2023
+estrattore-elezioni --comuni ROMA --data 03/10/2021
 
 # Solo l'ultima data disponibile
 estrattore-elezioni --solo-ultima-data
 
-# Regionali in Calabria (i risultati sono a livello regione)
-estrattore-elezioni --tipo R --comuni SAVELLI,VERZINO,CAMPANA
+# Regionali (i risultati sono a livello regione)
+estrattore-elezioni --tipo R --comuni ROMA --nome-regione LAZIO
 
 # Integrazione anagrafe amministratori DAIT nel JSON
-estrattore-elezioni --dait ammcom.csv
+estrattore-elezioni --comuni ROMA --dait ammcom.csv
 
 # Output in una cartella specifica, pausa più lunga
-estrattore-elezioni --out ./dati --sleep 2.0
+estrattore-elezioni --comuni ROMA --out ./dati --sleep 2.0
 ```
 
 ### Opzioni
 
 | Opzione | Default | Descrizione |
 |---|---|---|
-| `--comuni` | SAVELLI,VERZINO,CAMPANA | Comuni da cercare (virgola) |
-| `--regione` | `18-lev118` | Valore option della regione (Calabria) |
-| `--nome-regione` | `CALABRIA` | Testo della regione/circoscrizione (per le politiche la circoscrizione ha lo stesso nome) |
-| `--province` | CROTONE,COSENZA,CATANZARO | Province ammesse (Catanzaro per lo storico pre-1992) |
+| `--comuni` | (obbligatorio) | Comuni da cercare, separati da virgola |
+| `--regione` | `12-lev112` | Valore option della regione (Lazio). Vedi "Come trovare i valori" |
+| `--nome-regione` | `LAZIO` | Testo della regione/circoscrizione da cercare |
+| `--province` | `ROMA` | Province ammesse (virgola) |
 | `--tipo` | `G` | Tipo elezione: G comunali, R regionali, P provinciali, C camera, S senato, E europee, F referendum, A costituente |
 | `--out` | `dati_elezioni` | Cartella di output |
 | `--sleep` | `1.2` | Secondi tra una data e l'altra |
@@ -96,18 +93,88 @@ estrattore-elezioni --out ./dati --sleep 2.0
 | `--solo-ultima-data` | — | Solo l'ultima data (test) |
 | `--dait CSV` | — | CSV anagrafe amministratori DAIT da integrare nel JSON |
 
+## Come trovare i valori (regione, provincia)
+
+I valori `--regione` e `--province` **non si inventano: si leggono dal sito
+stesso**, ispezionando il form:
+
+1. Apri https://elezionistorico.interno.gov.it nel browser
+2. Seleziona il tipo di elezione e una data (es. Comunali)
+3. Apri gli strumenti sviluppatore (F12) → scheda Elementi
+4. Cerca il `<select>` della Regione: ogni `<option>` ha un attributo
+   `value` compatto, es.:
+
+   ```html
+   <option value="12-lev112">LAZIO</option>
+   <option value="18-lev118">CALABRIA</option>
+   ```
+
+   Il valore da passare a `--regione` è proprio quello: `12-lev112` per il
+   Lazio, `18-lev118` per la Calabria, ecc. Lo stesso vale per il select
+   Provincia (es. `<option value="58-lev258">ROMA</option>` → `--province ROMA`
+   per nome, perché lo script matcha il testo visibile).
+
+   Il numero (12, 18…) è il codice ISTAT di regione/provincia; la parte
+   `levN` indica il livello gerarchico e il suffisso ripete il codice:
+   `12-lev112` si decodifica in `ne1=12&lev1=12` (vedi "Come funziona").
+
+## Come funziona la serie storica
+
+Lo script non conosce a priori le date di elezione di un comune: le **legge
+dal sito**. Il primo `<select>` del form (`sel_date`) contiene tutte le date
+disponibili per il tipo di elezione scelto (per le comunali sono oltre 160,
+dal 1970 a oggi). Per **ogni data** lo script:
+
+1. seleziona la data nel form;
+2. scende la gerarchia (regione → provincia → comune) con le stesse
+   chiamate che fa il browser quando clicchi i menu a tendina;
+3. se il comune compare nell'elenco del livello finale, scarica la pagina
+   dei risultati e la parsa; altrimenti registra l'esito `NON_VOTATO`
+   (il comune non ha avuto elezioni in quella data: mandato in corso,
+   commissariamento, scioglimento) e passa alla data successiva.
+
+Alla fine il CSV contiene **una riga per ogni lista/candidato di ogni
+consultazione in cui il comune ha votato**: è la serie storica completa.
+Il log nel JSON distingue `OK`, `NON_VOTATO` ed eventuali `ERRORE`.
+
+## Come funziona `--dait`
+
+L'[anagrafe degli amministratori locali](https://dait.interno.gov.it/elezioni/open-data)
+è un open data del Ministero dell'Interno (file `ammcom.csv`, aggiornato con
+cadenza periodica, scaricabile dal portale open data DAIT). Il file elenca,
+per ogni comune, gli amministratori **in carica** con: nome, cognome, carica
+(sindaco, assessore, consigliere, commissario…), date di elezione e di
+entrata in carica, lista di appartenenza.
+
+Lo script non lo scarica da solo: gli va passato il percorso del CSV:
+
+```bash
+estrattore-elezioni --comuni ROMA --dait ammcom.csv
+```
+
+A quel punto `integra_dait`:
+1. legge il CSV (salta le prime righe di titolo e data di aggiornamento);
+2. filtra le righe per `denominazione_comune` tra i comuni richiesti;
+3. aggiunge al JSON di output una sezione `amministratori_dait` con, per
+   ogni comune, l'elenco degli amministratori in carica (carica, nominativo,
+   date, lista).
+
+È un'integrazione utile per incrociare i risultati elettorali con chi ha
+governato: es. per capire se il sindaco uscente è stato riconfermato o se
+il comune è sotto commissariamento.
+
 ## Formato output
 
 ### CSV (`;`)
 
 ```
 data_elezione;comune;provincia;elettori;votanti;affluenza_pct;bianche;non_valide;candidato;eletto;voti_candidato;pct_candidato;lista;voti_lista;pct_lista;seggi
-14/05/2023;SAVELLI;CROTONE;1662;819;49.28;3;9;SPINA FRANCESCO;True;415;51.23;RICOMINCIAMO;415;51.23;7
+03/10/2021;ROMA;ROMA;2359248;1145268;;12389;35356;GUALTIERI ROBERTO;True;299976;27.03;PARTITO DEMOCRATICO;166194;16.38;18
 ```
 
-Nelle elezioni storiche (sindaco eletto dal consiglio) la colonna `candidato`
-è vuota e restano le liste; nelle **regionali** il dato è a livello regione
-(replicato per ogni comune richiesto).
+Nelle elezioni storiche (amministratori eletti dal consiglio) la colonna
+`candidato` è vuota e restano le liste; nelle **regionali** il dato è a
+livello regione (replicato per ogni comune richiesto).
 
 ### JSON
 
@@ -121,21 +188,22 @@ Il sito usa un form con `<select>` pilotati da JS:
 
 ```html
 <select name="sel_sezione2" onchange="carica_pagina('index.php?tpel=G&dtel=...&tpe=R&...','ne1',this.options[this.selectedIndex].value);">
-  <option value="18-lev118">CALABRIA</option>
+  <option value="12-lev112">LAZIO</option>
 ```
 
 I valori delle option sono **codificati** e vanno decodificati:
 
 ```
-18-lev118        ->  ne1=18&lev1=18        (regione)
-97-lev297        ->  ne2=97&lev2=97        (provincia)
-970230-lev3230   ->  ne3=970230&lev3=230   (comune: il valore è il suffisso)
+12-lev112        ->  ne1=12&lev1=12        (regione)
+58-lev258        ->  ne2=58&lev2=58        (provincia)
+58091-lev558091  ->  ne3=58091&lev3=58091  (comune)
 I-lev00-levsut00-msN-tpeA -> tpa=I&lev0=0&levsut0=0&ms=N&tpe=A  (area)
 ```
 
 Lo script segue l'`onchange` di ogni select come farebbe il browser,
 mantenendo una sessione HTTP unica, e si ferma al primo livello la cui
-pagina contiene già la tabella dei risultati. La pagina dei risultati
+pagina contiene già la tabella dei risultati (così le regionali si fermano
+alla regione e le comunali arrivano al comune). La pagina dei risultati
 contiene tre tabelle: affluenza, schede, e candidati+liste (o sole liste
 per il periodo 1970-1985).
 
@@ -147,8 +215,6 @@ per il periodo 1970-1985).
   uninominale/plurinominale, non il comune: la ricerca per comune non trova
   risultati (limite della fonte, non dello strumento).
 - I risultati vanno verificati sul sito ufficiale per usi istituzionali.
-- Il dataset `ammcom.csv` dell'[anagrafe amministratori](https://dait.interno.gov.it/elezioni/open-data)
-  può essere integrato per incrociare i sindaci con i risultati elettorali.
 
 ## Struttura del progetto
 
@@ -161,7 +227,6 @@ estrattore-elezioni-italiane/
 │   └── estrattore.py    # logica: decodifica, navigazione, parsing
 ├── tests/               # test unitari (decodifica, parsing — senza rete)
 ├── examples/            # esempi di output
-├── .github/workflows/ci.yml
 ├── pyproject.toml
 └── README.md
 ```
