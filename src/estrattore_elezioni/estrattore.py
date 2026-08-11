@@ -435,24 +435,133 @@ def integra_dait(csv_path, comuni):
     return out
 
 
+# --------------------------------------------------------------------------
+# Esplorazione dei valori del form (--elenca)
+# --------------------------------------------------------------------------
+
+def esplora_livello(sessione, tipo, data, livello, nome_regione,
+                    regione_value, provincia_nome):
+    """
+    Stampa i valori REALI delle <option> del sito per il livello richiesto:
+    regioni, province o comuni disponibili per una data. Serve a scoprire i
+    valori da passare a --regione/--province senza aprire il browser.
+    Ritorna il codice di uscita (0 ok, 1 livello non raggiungibile).
+    """
+    r = sessione.get(f"{BASE}?tpel={tipo}&dtel={data}", timeout=30)
+    r.raise_for_status()
+    html_p = r.text
+    aree = leggi_select(html_p, "sel_aree")
+    if not aree:
+        print(f"[!] {data}: nessuna area (probabilmente nessuna elezione "
+              f"in questa data per tpel={tipo})")
+        return 1
+    pp, pv = leggi_onchange(html_p, "sel_aree")
+    html_p = scendi_livello(sessione,
+                            pp or f"index.php?tpel={tipo}&dtel={data}&es0=S",
+                            pv, aree[0][0])
+
+    if livello == "regioni":
+        for v, t in leggi_select(html_p, "sel_sezione2"):
+            print(f"  {v}  =  {t}")
+        return 0
+
+    # livello province/comuni: scegli la regione per testo (o valore)
+    scelta = None
+    for v, t in leggi_select(html_p, "sel_sezione2"):
+        if t.upper() == nome_regione.upper() or (regione_value and v == regione_value):
+            scelta = (v, t)
+            break
+    if scelta is None:
+        print(f"[!] Regione '{nome_regione}' non presente per {data}. "
+              f"Disponibili (valore = nome):")
+        for v, t in leggi_select(html_p, "sel_sezione2"):
+            print(f"  {v}  =  {t}")
+        return 1
+    pp, pv = leggi_onchange(html_p, "sel_sezione2")
+    html_p = scendi_livello(sessione, pp, pv, scelta[0])
+
+    if livello == "province":
+        for v, t in leggi_select(html_p, "sel_sezione3"):
+            print(f"  {v}  =  {t}")
+        return 0
+
+    # livello comuni: scegli la provincia per nome
+    province = leggi_select(html_p, "sel_sezione3")
+    if not province:
+        print(f"[!] Nessun livello provincia per {data}: i risultati sono "
+              f"già al livello regione ({scelta[1]}).")
+        return 1
+    scelta_prov = None
+    for v, t in province:
+        if t.upper() == provincia_nome.upper():
+            scelta_prov = (v, t)
+            break
+    if scelta_prov is None:
+        print(f"[!] Provincia '{provincia_nome}' non presente. Disponibili:")
+        for v, t in province:
+            print(f"  {v}  =  {t}")
+        return 1
+    pp, pv = leggi_onchange(html_p, "sel_sezione3")
+    html_p = scendi_livello(sessione, pp, pv, scelta_prov[0])
+    for v, t in leggi_select(html_p, "sel_sezione4"):
+        print(f"  {v}  =  {t}")
+    return 0
+
+
+# --------------------------------------------------------------------------
+# Download automatico dell'anagrafe DAIT (--dait auto)
+# --------------------------------------------------------------------------
+
+DAIT_AMMCOM_URL = "https://dait.interno.gov.it/documenti/ammcom.csv"
+
+
+def scarica_ammcom():
+    """Scarica (con cache) l'anagrafe amministratori DAIT.
+
+    Il file completo è ~30 MB e viene aggiornato con cadenza periodica dal
+    Ministero: la cache evita di riscaricarlo a ogni run. Ritorna il percorso.
+    """
+    cache_dir = os.path.join(os.path.expanduser("~"), ".cache",
+                             "estrattore-elezioni")
+    os.makedirs(cache_dir, exist_ok=True)
+    path = os.path.join(cache_dir, "ammcom.csv")
+    if os.path.isfile(path) and os.path.getsize(path) > 10_000_000:
+        print(f"[i] Anagrafe DAIT già in cache: {path}")
+        return path
+    print(f"[i] Download anagrafe amministratori DAIT (~30 MB) ...")
+    r = requests.get(DAIT_AMMCOM_URL, headers={"User-Agent": UA}, timeout=180)
+    r.raise_for_status()
+    with open(path, "wb") as f:
+        f.write(r.content)
+    mb = len(r.content) // (1024 * 1024)
+    print(f"[+] Anagrafe DAIT scaricata: {path} ({mb} MB)")
+    return path
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Estrazione storico elettorale da elezionistorico.interno.gov.it")
-    ap.add_argument("--comuni", required=True,
+    ap.add_argument("--comuni",
                     help="Comuni da cercare, separati da virgola (es. ROMA,MILANO)")
-    ap.add_argument("--regione", default="12-lev112",
-                    help="Valore option della regione (es. Lazio = 12-lev112). "
-                         "Si legge ispezionando il <select> Regione del sito "
-                         "(vedi README, sezione 'Come trovare i valori')")
+    ap.add_argument("--elenca", choices=["date", "regioni", "province", "comuni"],
+                    help="Esplora i valori REALI del form del sito per la data "
+                         "scelta (stampa valore = nome delle <option>) e esce: "
+                         "serve a scoprire --regione/--province senza aprire "
+                         "il browser")
+    ap.add_argument("--regione", default=None,
+                    help="Valore option della regione (es. 18-lev118). "
+                         "OPZIONALE: se omesso viene ricavato automaticamente "
+                         "dal nome (--nome-regione). Per scoprirlo: "
+                         "--elenca regioni")
     ap.add_argument("--nome-regione", default="LAZIO",
-                    help="Testo della regione/circoscrizione da cercare "
+                    help="Nome della regione/circoscrizione da cercare "
                          "(per le elezioni politiche la circoscrizione ha lo "
                          "stesso nome della regione)")
     ap.add_argument("--province", default="ROMA",
-                    help="Province ammesse (virgola). Per i comuni di province "
-                         "istituite dopo il 1992, indicare anche la provincia "
-                         "storica per coprire le elezioni precedenti "
-                         "(es. --province CROTONE,CATANZARO)")
+                    help="Province ammesse (virgola, per nome). Per i comuni "
+                         "di province istituite dopo il 1992, indicare anche "
+                         "la provincia storica per coprire le elezioni "
+                         "precedenti (es. --province CROTONE,CATANZARO)")
     ap.add_argument("--tipo", default="G",
                     help="Tipo elezione: G=comunali (default), C=camera, S=senato, "
                          "E=europee, F=referendum, R=regionali, P=provinciali, A=costituente")
@@ -463,14 +572,15 @@ def main():
     ap.add_argument("--solo-ultima-data", action="store_true",
                     help="Processa solo l'ultima data disponibile (test)")
     ap.add_argument("--data", help="Processa solo questa data (gg/mm/aaaa)")
-    ap.add_argument("--dait", metavar="CSV",
-                    help="CSV dell'anagrafe amministratori DAIT "
-                         "(dait.interno.gov.it/elezioni/open-data, file ammcom.csv "
-                         "filtrato) da integrare nel JSON: associa ai comuni i "
-                         "sindaci e i commissari in carica con il periodo di mandato")
+    ap.add_argument("--dait", metavar="CSV|auto",
+                    help="Anagrafe amministratori DAIT da integrare nel JSON "
+                         "(sindaci/commissari in carica con date e lista). "
+                         "'auto' scarica da solo il file ufficiale "
+                         "ammcom.csv dal portale open data del Ministero "
+                         "(con cache); oppure passa il percorso di un CSV "
+                         "già scaricato")
     args = ap.parse_args()
 
-    comuni = [c.strip().upper() for c in args.comuni.split(",") if c.strip()]
     province = tuple(p.strip().upper() for p in args.province.split(",") if p.strip())
     os.makedirs(args.out, exist_ok=True)
 
@@ -495,6 +605,27 @@ def main():
     elif args.solo_ultima_data:
         date = date[:1]
 
+    # ---- modalità esplorazione (--elenca): scopre i valori del form -------
+    if args.elenca:
+        if args.elenca == "date":
+            for d in date:
+                print(f"  {d}")
+            sys.exit(0)
+        data_probe = args.data or date[0]
+        if args.data is None:
+            print(f"[i] Uso la prima data disponibile ({data_probe}) per "
+                  f"l'esplorazione; puoi specificarne un'altra con --data.")
+        prima_provincia = args.province.split(",")[0].strip().upper()
+        codice = sys.exit(esplora_livello(
+            sessione, args.tipo, data_probe, args.elenca,
+            args.nome_regione, args.regione, prima_provincia))
+
+    if not args.comuni:
+        print("[!] Serve --comuni (es. --comuni ROMA,MILANO) oppure "
+              "--elenca (per esplorare i valori del sito).")
+        sys.exit(2)
+
+    comuni = [c.strip().upper() for c in args.comuni.split(",") if c.strip()]
     risultati = {c: [] for c in comuni}
     log = []
 
@@ -561,7 +692,9 @@ def main():
     payload = {"generato": ts, "comuni": comuni,
                "risultati": risultati, "log": log}
     if args.dait:
-        payload["amministratori_dait"] = integra_dait(args.dait, comuni)
+        percorso_dait = (scarica_ammcom() if args.dait == "auto"
+                         else args.dait)
+        payload["amministratori_dait"] = integra_dait(percorso_dait, comuni)
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
     print(f"[+] JSON: {json_path}")
