@@ -1,34 +1,42 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-estrattore_elezioni.py — Estrazione serie storica elettorale comunale
-dall'Archivio Storico delle Elezioni del Ministero dell'Interno (DAIT).
+tallyho.py — TallyHo: ti porta a spasso nella storia elettorale italiana.
 
 Fonte: https://elezionistorico.interno.gov.it (1946-oggi)
 Licenza: MIT
 
-Il sito usa un form progressivo (data -> area -> regione -> provincia ->
-comune) pilotato da JavaScript. Ogni <select> ha un onchange del tipo:
+Perché esiste: l'Archivio Storico delle Elezioni del Ministero dell'Interno
+è un tesoro — 70 anni di voti, sindaci, liste e affluenze — ma per
+guardarlo devi cliccare un form JavaScript a più passi, per ogni data, per
+ogni comune, a mano. TallyHo fa i clic al posto tuo: gli dici "portami
+tutto quello che ha votato questo comune" e lui scende la gerarchia
+(data -> area -> regione -> provincia -> comune) per ogni data disponibile,
+estrae i risultati e te li consegna in CSV e JSON, pronti per l'analisi.
+
+Il sito usa un form progressivo pilotato da JavaScript. Ogni <select> ha
+un onchange del tipo:
 
     carica_pagina('index.php?tpel=G&dtel=...&tpa=I&tpe=R&...','ne1',value)
 
 dove `value` è una stringa compatta decodificabile nel formato:
 
-    '18-lev118'        ->  ne1=18&lev1=18
-    '97-lev297'        ->  ne2=97&lev2=97
-    '970230-lev3230'   ->  ne3=970230&lev3=230
+    '99-lev199'        ->  ne1=99&lev1=99          (regione)
+    '98-lev298'        ->  ne2=98&lev2=98          (provincia)
+    '99999-lev399999'  ->  ne3=99999&lev3=99999    (comune)
     'I-lev00-levsut00-msN-tpeA' -> tpa=I&lev0=0&levsut0=0&ms=N&tpe=A
 
 Questo script riproduce la stessa sequenza di chiamate GET mantenendo una
 sessione HTTP, scende lungo la gerarchia fino ai comuni richiesti e salva
-i risultati in CSV e JSON.
+i risultati in CSV e JSON. Tally-ho!
 
 Uso:
-    estrattore-elezioni --comuni ROMA,MILANO                 # serie storica
-    estrattore-elezioni --comuni ROMA --tipo G               # solo comunali
-    estrattore-elezioni --comuni ROMA --regione 12-lev112 --nome-regione LAZIO
-    estrattore-elezioni --comuni ROMA --out ./dati --sleep 1.5
-    estrattore-elezioni --comuni ROMA --solo-ultima-data     # test rapido
+    tallyho --comuni ROMA,MILANO                 # serie storica
+    tallyho --comuni ROMA --tipo G               # solo comunali
+    tallyho --comuni ROMA --nome-regione LAZIO   # regione per nome
+    tallyho --comuni ROMA --out ./dati --sleep 1.5
+    tallyho --elenca regioni --data 14/05/2023   # scopri i valori
+    tallyho --comuni ROMA --dait auto            # + anagrafe amministratori
 """
 
 import argparse
@@ -54,7 +62,7 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 # --------------------------------------------------------------------------
 
 def decodifica_opzione(valore):
-    """Decodifica '970230-lev3230' -> ('970230', 'lev3', '230').
+    """Decodifica '99999-lev399999' -> ('99999', 'lev3', '99999').
 
     Formato: <valore1>-<var2><valore2> dove var2 è lungo 4 caratteri
     (lev1, lev2, lev3...). Input senza trattino restituisce la stringa
@@ -522,7 +530,7 @@ def scarica_ammcom():
     Ministero: la cache evita di riscaricarlo a ogni run. Ritorna il percorso.
     """
     cache_dir = os.path.join(os.path.expanduser("~"), ".cache",
-                             "estrattore-elezioni")
+                             "tallyho")
     os.makedirs(cache_dir, exist_ok=True)
     path = os.path.join(cache_dir, "ammcom.csv")
     if os.path.isfile(path) and os.path.getsize(path) > 10_000_000:
@@ -540,7 +548,8 @@ def scarica_ammcom():
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Estrazione storico elettorale da elezionistorico.interno.gov.it")
+        description="TallyHo — ti porta a spasso nella storia elettorale "
+                    "italiana (Archivio Storico DAIT, 1946-oggi)")
     ap.add_argument("--comuni",
                     help="Comuni da cercare, separati da virgola (es. ROMA,MILANO)")
     ap.add_argument("--elenca", choices=["date", "regioni", "province", "comuni"],
@@ -549,7 +558,7 @@ def main():
                          "serve a scoprire --regione/--province senza aprire "
                          "il browser")
     ap.add_argument("--regione", default=None,
-                    help="Valore option della regione (es. 18-lev118). "
+                    help="Valore option della regione (es. 99-lev199). "
                          "OPZIONALE: se omesso viene ricavato automaticamente "
                          "dal nome (--nome-regione). Per scoprirlo: "
                          "--elenca regioni")
@@ -561,7 +570,7 @@ def main():
                     help="Province ammesse (virgola, per nome). Per i comuni "
                          "di province istituite dopo il 1992, indicare anche "
                          "la provincia storica per coprire le elezioni "
-                         "precedenti (es. --province CROTONE,CATANZARO)")
+                         "precedenti (es. --province LECCO,COMO: Lecco è stata istituita nel 1992, prima i suoi comuni erano in provincia di Como)")
     ap.add_argument("--tipo", default="G",
                     help="Tipo elezione: G=comunali (default), C=camera, S=senato, "
                          "E=europee, F=referendum, R=regionali, P=provinciali, A=costituente")

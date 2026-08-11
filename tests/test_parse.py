@@ -1,6 +1,6 @@
 """Test del parsing delle pagine dei risultati (formati moderno e storico)."""
 
-from estrattore_elezioni import parse_risultati
+from tallyho import parse_risultati
 
 # Pagina comunale moderna (26/05/2019, semplificata ma fedele al formato)
 HTML_MODERNO = """

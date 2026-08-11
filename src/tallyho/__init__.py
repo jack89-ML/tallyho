@@ -2,7 +2,7 @@
 
 __version__ = "1.0.0"
 
-from .estrattore import (  # noqa: F401
+from .tallyho import (  # noqa: F401
     BASE,
     decodifica_area,
     decodifica_opzione,

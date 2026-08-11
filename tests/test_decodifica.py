@@ -2,15 +2,15 @@
 
 import pytest
 
-from estrattore_elezioni import decodifica_area, decodifica_opzione
+from tallyho import decodifica_area, decodifica_opzione
 
 
 def test_decodifica_opzione_regione():
-    assert decodifica_opzione("18-lev118") == ("18", "lev1", "18")
+    assert decodifica_opzione("99-lev199") == ("99", "lev1", "99")
 
 
 def test_decodifica_opzione_provincia():
-    assert decodifica_opzione("97-lev297") == ("97", "lev2", "97")
+    assert decodifica_opzione("98-lev298") == ("98", "lev2", "98")
 
 
 def test_decodifica_opzione_comune():
@@ -18,8 +18,8 @@ def test_decodifica_opzione_comune():
     assert decodifica_opzione("53012-lev353012") == ("53012", "lev3", "53012")
 
 
-def test_decodifica_opzione_roma():
-    assert decodifica_opzione("58091-lev558091") == ("58091", "lev5", "58091")
+def test_decodifica_opzione_livello5():
+    assert decodifica_opzione("12345-lev512345") == ("12345", "lev5", "12345")
 
 
 def test_decodifica_area():

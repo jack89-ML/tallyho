@@ -1,14 +1,16 @@
-# estrattore-elezioni-italiane
+# tallyho-italiane
 
-Estrazione della **serie storica elettorale italiana** dall'
-[Archivio Storico delle Elezioni](https://elezionistorico.interno.gov.it) del
-Ministero dell'Interno (DAIT) — copertura dal **1946 a oggi**.
+**TallyHo** ti porta a spasso nella storia elettorale italiana — dal 1946
+a oggi, comune per comune, senza un solo click a mano.
 
-Il sito ufficiale è navigabile solo tramite un form JavaScript a più passi
-(data → area → regione → … → comune). Questo strumento riproduce
-esattamente quella sequenza di chiamate (decodificando i valori compatti
-delle `<option>`, es. `12-lev112` → `ne1=12&lev1=12`) e salva i risultati
-in **CSV** e **JSON**.
+L'[Archivio Storico delle Elezioni](https://elezionistorico.interno.gov.it)
+del Ministero dell'Interno (DAIT) è un tesoro: 70 anni di voti, sindaci,
+liste, affluenze e ballottaggi. Peccato che per guardarlo devi cliccare un
+form JavaScript a più passi — data, area, regione, provincia, comune — e
+ricominciare da capo per ogni data. TallyHo fa i clic al posto tuo:
+gli dici **"portami tutto quello che ha votato questo comune"** e lui
+scende la gerarchia per **ogni data disponibile**, estrae i risultati e te
+li consegna in **CSV** e **JSON**, pronti per l'analisi.
 
 ## Perché esiste
 
@@ -45,7 +47,7 @@ in **CSV** e **JSON**.
 
 ```bash
 git clone <questo-repo>
-cd estrattore-elezioni-italiane
+cd tallyho-italiane
 python3 -m venv .venv
 .venv/bin/pip install -e .
 ```
@@ -61,25 +63,25 @@ pytest
 
 ```bash
 # Serie storica comunale (es. Roma e Milano)
-estrattore-elezioni --comuni ROMA,MILANO
+tallyho --comuni ROMA,MILANO
 
 # Equivalente via python -m
-python -m estrattore_elezioni --comuni ROMA,MILANO
+python -m tallyho --comuni ROMA,MILANO
 
 # Solo una data (test rapido)
-estrattore-elezioni --comuni ROMA --data 03/10/2021
+tallyho --comuni ROMA --data 03/10/2021
 
 # Solo l'ultima data disponibile
-estrattore-elezioni --solo-ultima-data
+tallyho --solo-ultima-data
 
 # Regionali (i risultati sono a livello regione)
-estrattore-elezioni --tipo R --comuni ROMA --nome-regione LAZIO
+tallyho --tipo R --comuni ROMA --nome-regione LAZIO
 
 # Integrazione anagrafe amministratori DAIT nel JSON
-estrattore-elezioni --comuni ROMA --dait ammcom.csv
+tallyho --comuni ROMA --dait ammcom.csv
 
 # Output in una cartella specifica, pausa più lunga
-estrattore-elezioni --comuni ROMA --out ./dati --sleep 2.0
+tallyho --comuni ROMA --out ./dati --sleep 2.0
 ```
 
 ### Opzioni
@@ -106,28 +108,28 @@ I valori di `--regione` e `--province` si scoprono da soli con l'opzione
 
 ```bash
 # tutte le date disponibili per le comunali
-estrattore-elezioni --elenca date
+tallyho --elenca date
 
 # regioni che hanno votato il 14/05/2023 (valore = nome)
-estrattore-elezioni --elenca regioni --data 14/05/2023
+tallyho --elenca regioni --data 14/05/2023
 
-# province della Calabria in quella data
-estrattore-elezioni --elenca province --data 14/05/2023 --nome-regione CALABRIA
+# province della Toscana in quella data
+tallyho --elenca province --data 14/05/2023 --nome-regione TOSCANA
 
-# comuni della provincia di Crotone in quella data
-estrattore-elezioni --elenca comuni --data 14/05/2023 \
-    --nome-regione CALABRIA --province CROTONE
+# comuni della provincia di Firenze in quella data
+tallyho --elenca comuni --data 14/05/2023 \
+    --nome-regione TOSCANA --province FIRENZE
 ```
 
 Output di esempio:
 
 ```
-  18-lev118  =  CALABRIA
+  09-lev19   =  TOSCANA
   12-lev112  =  LAZIO
   ...
-  97-lev297  =  CROTONE
+  048-lev248 =  FIRENZE
   ...
-  970230-lev3230  =  SAVELLI
+  48017-lev348017  =  EMPOLI
 ```
 
 In pratica **non serve mai conoscere i valori a memoria**: lo script
@@ -166,11 +168,11 @@ Due modi di usarlo:
 
 ```bash
 # 1) automatico: scarica il file ufficiale dal portale del Ministero
-#    (cache in ~/.cache/estrattore-elezioni/, ~30 MB una tantum)
-estrattore-elezioni --comuni ROMA --dait auto
+#    (cache in ~/.cache/tallyho/, ~30 MB una tantum)
+tallyho --comuni ROMA --dait auto
 
 # 2) manuale: passi un CSV già scaricato (anche filtrato per i comuni)
-estrattore-elezioni --comuni ROMA --dait ammcom.csv
+tallyho --comuni ROMA --dait ammcom.csv
 ```
 
 A quel punto `integra_dait`:
@@ -193,19 +195,19 @@ estrae da solo iterando su tutte le date disponibili:
 ```bash
 # serie storica COMPLETA di uno o più comuni (tutte le date, tutti i tipi
 # selezionati con --tipo; default comunali)
-estrattore-elezioni --comuni SAVELLI,VERZINO --nome-regione CALABRIA \
-    --province CROTONE,CATANZARO --out dati_elezioni
+tallyho --comuni FIRENZE,PRATO --nome-regione TOSCANA \
+    --province FIRENZE,PRATO --out dati_elezioni
 
 # stessa cosa, ma salvando anche l'anagrafe degli amministratori nel JSON
-estrattore-elezioni --comuni SAVELLI,VERZINO --nome-regione CALABRIA \
-    --province CROTONE,CATANZARO --dait auto
+tallyho --comuni FIRENZE,PRATO --nome-regione TOSCANA \
+    --province FIRENZE,PRATO --dait auto
 
 # anche le elezioni regionali della zona
-estrattore-elezioni --comuni SAVELLI --tipo R --nome-regione CALABRIA
+tallyho --comuni FIRENZE --tipo R --nome-regione TOSCANA
 
 # test rapido: solo l'ultima data (per verificare che tutto funzioni)
-estrattore-elezioni --comuni SAVELLI --nome-regione CALABRIA \
-    --province CROTONE --solo-ultima-data
+tallyho --comuni FIRENZE --nome-regione TOSCANA \
+    --province FIRENZE --solo-ultima-data
 ```
 
 Cosa produce (nella cartella `--out`):
@@ -278,10 +280,10 @@ per il periodo 1970-1985).
 ## Struttura del progetto
 
 ```
-estrattore-elezioni-italiane/
-├── src/estrattore_elezioni/
+tallyho-italiane/
+├── src/tallyho/
 │   ├── __init__.py      # API pubblica
-│   ├── __main__.py      # python -m estrattore_elezioni
+│   ├── __main__.py      # python -m tallyho
 │   ├── cli.py           # console script
 │   └── estrattore.py    # logica: decodifica, navigazione, parsing
 ├── tests/               # test unitari (decodifica, parsing — senza rete)
