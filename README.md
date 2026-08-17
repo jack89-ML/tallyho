@@ -346,7 +346,7 @@ lo strumento, ad esempio come segue:
 
 > Peracchio, Jacopo (2026). *TallyHo*: serie storica elettorale italiana,
 > comune per comune (Versione 1.0.0) [Software].
-> https://github.com/jack89-ML/tallyho
+> https://doi.org/10.5281/zenodo.21979207
 
 In BibTeX:
 
@@ -356,6 +356,7 @@ In BibTeX:
   title = {{TallyHo}: serie storica elettorale italiana, comune per comune},
   year = {2026},
   version = {1.0.0},
+  doi = {10.5281/zenodo.21979207},
   url = {https://github.com/jack89-ML/tallyho}
 }
 ```
@@ -366,7 +367,7 @@ APA e BibTeX.
 
 Ogni release di TallyHo è inoltre archiviata su
 [Zenodo](https://zenodo.org) (servizio CERN di archiviazione per la
-ricerca) con un **DOI permanente**: una volta creata la prima release su
-GitHub, il DOI della versione compare qui e nel `CITATION.cff`. Il DOI
-identifica la versione archiviata in modo stabile, anche se il link a
-GitHub cambiasse.
+ricerca) con un **DOI permanente**: la versione 1.0.0 ha il DOI
+[10.5281/zenodo.21979207](https://doi.org/10.5281/zenodo.21979207).
+Il DOI identifica la versione archiviata in modo stabile, anche se il
+link a GitHub cambiasse.
