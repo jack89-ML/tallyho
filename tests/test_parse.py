@@ -306,7 +306,7 @@ def test_parse_regionali():
     assert rocca["eletto"] is True
     assert rocca["voti_candidato"] == 936388
     assert rocca["pct_candidato"] == 53.89
-    assert [l["lista"] for l in rocca["liste"]] == ["FRATELLI D'ITALIA", "LEGA"]
+    assert [lst["lista"] for lst in rocca["liste"]] == ["FRATELLI D'ITALIA", "LEGA"]
     assert rocca["liste"][0]["voti"] == 520731
     assert rocca["liste"][0]["pct"] == 33.63
     assert rocca["liste"][0]["seggi"] == 22

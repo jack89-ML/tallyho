@@ -45,3 +45,13 @@ addopts = "-m 'not integration'"
 markers = [
     "integration: test che richiedono rete (esclusi di default, esegui con -m integration)",
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+# Regole base: errori di stile (E), variabili non definite/import inutilizzati
+# (F), warning (W). E501 (riga lunga) non è attiva: il codice usa stringhe
+# help lunghe e docstring che superano 88 colonne senza nuocere alla lettura.
+select = ["E4", "E7", "E9", "F"]

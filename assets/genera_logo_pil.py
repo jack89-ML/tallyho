@@ -2,6 +2,7 @@
 """Logo vettoriale TallyHo (deterministico, PIL): seggiovia con urne,
 montagna a gradoni, scheda di spoglio e wordmark TallyHo."""
 from PIL import Image, ImageDraw, ImageFont
+import os
 
 W = H = 1024
 BLU = (15, 27, 45)        # sfondo notte
@@ -12,7 +13,6 @@ VERDE_CHIARO = (62, 155, 110)
 GRIGIO_FUNE = (200, 210, 225)
 
 FONT_PATH = "/usr/share/fonts/truetype/lato/Lato-Bold.ttf"
-import os
 if not os.path.isfile(FONT_PATH):
     FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 

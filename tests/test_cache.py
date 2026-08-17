@@ -1,8 +1,5 @@
 """Test della cache dei form (SQLite, ~/.cache/tallyho/)."""
 
-import os
-import time
-
 import pytest
 import requests
 

@@ -5,6 +5,8 @@ import types
 
 import pytest
 
+from tallyho.tallyho import _applica_config, _carica_config, _imposta_default
+
 
 def _toml_disponibile():
     try:
@@ -16,9 +18,6 @@ def _toml_disponibile():
             return True
         except ImportError:
             return False
-
-
-from tallyho.tallyho import _applica_config, _carica_config, _imposta_default
 
 
 @pytest.mark.skipif(not _toml_disponibile(), reason="tomllib/tomli non disponibili")

@@ -11,13 +11,18 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
       Risolto: fallback `votanti / elettori * 100` quando il sito non
       espone la percentuale (commit 5b56365, 83000e3). Verificato dal vivo
       su Roma 12/02/2023 (37.2%).
-- [ ] **CI attivo**: ripristinare il workflow GitHub Actions (matrix
-      Python 3.9-3.12, pytest + ruff) — serve autorizzare lo scope
-      `workflow` sul token di pubblicazione, poi il push del workflow.
+- [~] **CI attivo**: workflow pronto e versionato in
+      `.github/workflows/ci.yml` (matrix Python 3.9-3.12,
+      `pytest -m "not integration"` + `ruff check`). Resta da autorizzare lo
+      scope `workflow` sul token di pubblicazione: se il push del file sotto
+      `.github/workflows` fallisce con 403, serve `gh auth refresh -s
+      workflow` e poi il push.
 - [x] **Test di integrazione** (rete, opzionali): fatto — `tests/test_integrazione.py`
       marcato `@pytest.mark.integration`, escluso dal default con
-      `addopts="-m 'not integration'"` (commit 83000e3). Da eseguire su
-      schedule nel CI quando riattivato.
+      `addopts="-m 'not integration'"` (commit 83000e3). Esteso a 5 tipi di
+      elezione (G/R/F/E/P): `leggi_date` per tutti + estrazione reale di una
+      data su comunali (ROMA) e referendum (AFFILE, 5 quesiti). Da eseguire
+      su schedule nel CI quando riattivato.
 
 ## P2 — Ottimizzazioni
 
@@ -41,8 +46,10 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
       fallire con un messaggio chiaro che indica cosa cercare, invece di
       un generico "non votato". Idea: uno snapshot di riferimento dei
       selettori da confrontare a ogni run.
-- [ ] **README in inglese**: sezione "Contributing" / README EN per i
-      contributori internazionali.
+- [x] **README in inglese**: fatto — `README.en.md` (traduzione completa con
+      pitch, funzionalità, installazione, uso, opzioni, formato output,
+      citazione e DOI), link dal README principale, sezione "Contributing"
+      in italiano e in inglese.
 - [ ] **Politiche per comune**: il sito pubblica il voto per collegio, non
       per comune (limite della fonte). Valutare se aggregare i dati per
       comune via open data DAIT (scrutini per sezione, se pubblicati) —

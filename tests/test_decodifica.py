@@ -1,7 +1,5 @@
 """Test della decodifica delle opzioni del form (replica del JS del sito)."""
 
-import pytest
-
 from tallyho import decodifica_area, decodifica_opzione
 
 

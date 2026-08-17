@@ -356,7 +356,7 @@ def main():
             print(f"[i] Uso la prima data disponibile ({data_probe}) per "
                   f"l'esplorazione; puoi specificarne un'altra con --data.")
         prima_provincia = args.province.split(",")[0].strip().upper()
-        codice = sys.exit(esplora_livello(
+        sys.exit(esplora_livello(
             sessione, args.tipo, data_probe, args.elenca,
             args.nome_regione, args.regione, prima_provincia))
 

@@ -33,9 +33,9 @@ def esporta_csv(percorso: str, comuni: list, risultati: dict) -> None:
                     riga = base + [c["candidato"] or "", c["eletto"],
                                    c["voti_candidato"], c["pct_candidato"]]
                     if c["liste"]:
-                        for l in c["liste"]:
-                            w.writerow(riga + [l["lista"], l["voti"],
-                                               l["pct"], l["seggi"]])
+                        for lista in c["liste"]:
+                            w.writerow(riga + [lista["lista"], lista["voti"],
+                                               lista["pct"], lista["seggi"]])
                     else:
                         w.writerow(riga + ["", "", "", ""])
                 # referendum: una riga per quesito, due righe SI/NO
@@ -102,9 +102,9 @@ def esporta_long(percorso: str, comuni: list, risultati: dict) -> None:
                     w.writerow(base + ["candidato", c["candidato"] or "",
                                        c["voti_candidato"],
                                        c["pct_candidato"], c["eletto"], ""])
-                    for l in c["liste"]:
-                        w.writerow(base + ["lista", l["lista"], l["voti"],
-                                           l["pct"], "", l["seggi"]])
+                    for lista in c["liste"]:
+                        w.writerow(base + ["lista", lista["lista"], lista["voti"],
+                                           lista["pct"], "", lista["seggi"]])
                 # referendum: righe scheda + due righe per quesito (SI/NO)
                 for q in rec.get("quesiti", []):
                     titolo = q["quesito"]
@@ -153,9 +153,9 @@ def esporta_xlsx(percorso: str, comuni: list, risultati: dict) -> None:
                 riga = base + [c["candidato"] or "", c["eletto"],
                                c["voti_candidato"], c["pct_candidato"]]
                 if c["liste"]:
-                    for l in c["liste"]:
-                        ws.append(riga + [l["lista"], l["voti"], l["pct"],
-                                          l["seggi"]])
+                    for lista in c["liste"]:
+                        ws.append(riga + [lista["lista"], lista["voti"], lista["pct"],
+                                          lista["seggi"]])
                 else:
                     ws.append(riga + ["", "", "", ""])
             for q in rec.get("quesiti", []):
@@ -195,9 +195,9 @@ def esporta_parquet(percorso: str, comuni: list, risultati: dict) -> None:
                 riga = base + [c["candidato"] or "", c["eletto"],
                                c["voti_candidato"], c["pct_candidato"]]
                 if c["liste"]:
-                    for l in c["liste"]:
-                        righe.append(riga + [l["lista"], l["voti"], l["pct"],
-                                             l["seggi"]])
+                    for lista in c["liste"]:
+                        righe.append(riga + [lista["lista"], lista["voti"], lista["pct"],
+                                             lista["seggi"]])
                 else:
                     righe.append(riga + ["", "", "", ""])
             for q in rec.get("quesiti", []):
@@ -237,7 +237,7 @@ def scarica_ammcom() -> str:
     if os.path.isfile(path) and os.path.getsize(path) > 10_000_000:
         print(f"[i] Anagrafe DAIT già in cache: {path}")
         return path
-    print(f"[i] Download anagrafe amministratori DAIT (~30 MB) ...")
+    print("[i] Download anagrafe amministratori DAIT (~30 MB) ...")
     r = requests.get(DAIT_AMMCOM_URL, headers={"User-Agent": UA}, timeout=180)
     r.raise_for_status()
     with open(path, "wb") as f:
