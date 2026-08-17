@@ -79,9 +79,12 @@ def decodifica_area(valore):
     """Decodifica 'I-lev00-levsut00-msN-tpeA' -> stringa query completa.
 
     Formato: <tpa>-<var><val>-<var><val>-<var><val>-<var><val> con variabili
-    di lunghezza fissa (lev0=4, levsut0=7, ms=2, tpe=3).
+    di lunghezza fissa (lev0=4, levsut0=7, ms=2, tpe=3). Ritorna None su
+    input malformati (robustezza su pagine anomale).
     """
     parti = valore.split("-")
+    if len(parti) < 5:
+        return None
     tpa = parti[0]
     var2, p2 = parti[1][:4], parti[1][4:]
     var3, p3 = parti[2][:7], parti[2][7:]
@@ -131,12 +134,11 @@ def leggi_date(html_page):
 def scendi_livello(sessione, page_path, page_var, valore):
     """Aggiunge il livello selezionato alla URL e carica la pagina."""
     if page_var == "tpa":
-        qs = decodifica_area(valore)
+        qs = decodifica_area(valore) or ""
     else:
         p1, var2, p2 = decodifica_opzione(valore)
         qs = f"&{page_var}={p1}&{var2}={p2}"
-    url = BASE + ("?" + page_path if page_path and not page_path.startswith(
-        "index.php?") else "?" + page_path) + qs
+    url = BASE + ("?" + page_path if page_path else "") + qs
     url = url.replace("?index.php?", "?")  # normalizzazione
     if not url.startswith("http"):
         url = "https://elezionistorico.interno.gov.it/" + url.lstrip("/")
@@ -409,7 +411,6 @@ def integra_dait(csv_path, comuni):
     if not os.path.isfile(csv_path):
         print(f"[!] File DAIT non trovato: {csv_path}")
         return {}
-    import csv as _csv
     with open(csv_path, newline="", encoding="utf-8-sig") as f:
         righe_raw = f.read().splitlines()
     # scarta le prime righe finché non trovo l'intestazione con i nomi
@@ -421,8 +422,8 @@ def integra_dait(csv_path, comuni):
     if start == 0 and "denominazione_comune" not in righe_raw[0]:
         print("[!] Intestazione DAIT non trovata nel CSV")
         return {}
-    reader = _csv.DictReader(righe_raw[start:], delimiter=";",
-                             quoting=_csv.QUOTE_ALL)
+    reader = csv.DictReader(righe_raw[start:], delimiter=";",
+                            quoting=csv.QUOTE_ALL)
     out = {c: [] for c in comuni}
     for r in reader:
         comune = (r.get("denominazione_comune") or "").strip().upper()
@@ -544,6 +545,61 @@ def scarica_ammcom():
     mb = len(r.content) // (1024 * 1024)
     print(f"[+] Anagrafe DAIT scaricata: {path} ({mb} MB)")
     return path
+
+
+# --------------------------------------------------------------------------
+# Export CSV/JSON
+# --------------------------------------------------------------------------
+
+def esporta_csv(percorso, comuni, risultati):
+    """Scrive i risultati in CSV (delimitatore ';', UTF-8 BOM per Excel).
+
+    Una riga per ogni lista/candidato di ogni consultazione.
+    """
+    with open(percorso, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.writer(f, delimiter=";")
+        w.writerow(["data_elezione", "comune", "provincia", "elettori",
+                    "votanti", "affluenza_pct", "bianche", "non_valide",
+                    "candidato", "eletto", "voti_candidato", "pct_candidato",
+                    "lista", "voti_lista", "pct_lista", "seggi"])
+        for comune in comuni:
+            for rec in risultati[comune]:
+                for c in rec["candidati"]:
+                    if c["liste"]:
+                        for l in c["liste"]:
+                            w.writerow([rec["data_elezione"], rec["comune"],
+                                        rec["provincia"], rec["elettori"],
+                                        rec["votanti"], rec["affluenza_pct"],
+                                        rec["bianche"], rec["non_valide"],
+                                        c["candidato"] or "", c["eletto"],
+                                        c["voti_candidato"], c["pct_candidato"],
+                                        l["lista"], l["voti"], l["pct"],
+                                        l["seggi"]])
+                    else:
+                        w.writerow([rec["data_elezione"], rec["comune"],
+                                    rec["provincia"], rec["elettori"],
+                                    rec["votanti"], rec["affluenza_pct"],
+                                    rec["bianche"], rec["non_valide"],
+                                    c["candidato"] or "", c["eletto"],
+                                    c["voti_candidato"], c["pct_candidato"],
+                                    "", "", "", ""])
+
+
+def esporta_json(percorso, comuni, risultati, log, amministratori_dait=None,
+                 generato=None):
+    """Scrive i risultati in JSON (struttura annidata + log di navigazione).
+
+    `amministratori_dait` (se diverso da None) aggiunge la sezione omonima;
+    `generato` è il timestamp (default: adesso).
+    """
+    if generato is None:
+        generato = datetime.now().strftime("%Y%m%d_%H%M%S")
+    payload = {"generato": generato, "comuni": comuni,
+               "risultati": risultati, "log": log}
+    if amministratori_dait is not None:
+        payload["amministratori_dait"] = amministratori_dait
+    with open(percorso, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
 def main():
@@ -676,45 +732,18 @@ def main():
     # ---- export CSV ----
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     csv_path = os.path.join(args.out, f"elezioni_{ts}.csv")
-    with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.writer(f, delimiter=";")
-        w.writerow(["data_elezione", "comune", "provincia", "elettori",
-                    "votanti", "affluenza_pct", "bianche", "non_valide",
-                    "candidato", "eletto", "voti_candidato", "pct_candidato",
-                    "lista", "voti_lista", "pct_lista", "seggi"])
-        for comune in comuni:
-            for rec in risultati[comune]:
-                for c in rec["candidati"]:
-                    if c["liste"]:
-                        for l in c["liste"]:
-                            w.writerow([rec["data_elezione"], rec["comune"],
-                                        rec["provincia"], rec["elettori"],
-                                        rec["votanti"], rec["affluenza_pct"],
-                                        rec["bianche"], rec["non_valide"],
-                                        c["candidato"] or "", c["eletto"],
-                                        c["voti_candidato"], c["pct_candidato"],
-                                        l["lista"], l["voti"], l["pct"],
-                                        l["seggi"]])
-                    else:
-                        w.writerow([rec["data_elezione"], rec["comune"],
-                                    rec["provincia"], rec["elettori"],
-                                    rec["votanti"], rec["affluenza_pct"],
-                                    rec["bianche"], rec["non_valide"],
-                                    c["candidato"] or "", c["eletto"],
-                                    c["voti_candidato"], c["pct_candidato"],
-                                    "", "", "", ""])
+    esporta_csv(csv_path, comuni, risultati)
     print(f"\n[+] CSV: {csv_path}")
 
     # ---- export JSON ----
     json_path = os.path.join(args.out, f"elezioni_{ts}.json")
-    payload = {"generato": ts, "comuni": comuni,
-               "risultati": risultati, "log": log}
+    amministratori = None
     if args.dait:
         percorso_dait = (scarica_ammcom() if args.dait == "auto"
                          else args.dait)
-        payload["amministratori_dait"] = integra_dait(percorso_dait, comuni)
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+        amministratori = integra_dait(percorso_dait, comuni)
+    esporta_json(json_path, comuni, risultati, log, amministratori,
+                 generato=ts)
     print(f"[+] JSON: {json_path}")
 
     # ---- riepilogo ----

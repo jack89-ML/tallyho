@@ -41,3 +41,10 @@ def test_decodifica_valori_malformati_non_crash():
     for valore in ["", "18", "18-", "-lev118", "a-b-c-d-e"]:
         out = decodifica_opzione(valore)
         assert isinstance(out, tuple) and len(out) == 3
+
+
+def test_decodifica_area_valori_malformati():
+    # protezione su input malformati: mai eccezioni, ritorna None quando il
+    # formato non ha i 5 segmenti attesi
+    for valore in ["", "I", "I-lev0", "a-b", "a-b-c", "I-lev00-levsut00"]:
+        assert decodifica_area(valore) is None
