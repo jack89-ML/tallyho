@@ -1,7 +1,12 @@
 """Test del parsing delle pagine dei risultati (formati moderno e storico)."""
 
-from tallyho import (parse_affluenza, parse_referendum, parse_risultati,
-                     parse_schede, rileva_turno)
+from pathlib import Path
+
+import pytest
+
+from tallyho import (parse_affluenza, parse_candidati_regionali,
+                     parse_referendum, parse_risultati, parse_schede,
+                     rileva_turno)
 
 # Pagina comunale moderna (26/05/2019, semplificata ma fedele al formato)
 HTML_MODERNO = """
@@ -205,3 +210,148 @@ def test_rileva_turno_ballottaggio():
 def test_rileva_turno_primo():
     assert rileva_turno("<th>Affluenza</th>") == "1° turno"
     assert rileva_turno("<th>Candidati e Liste/Gruppi</th>") == "1° turno"
+
+
+# ---------------------------------------------------------------------------
+# Elezioni regionali (Lazio 12/02/2023): candidati presidente (righe
+# class='leader') con liste collegate, totali di coalizione e complessivi.
+# ---------------------------------------------------------------------------
+
+# Fixture semplificata ma fedele al formato reale: 2 leader + liste,
+# 'totale_liste' (Totale coalizione) e 'totalecomplessivovoti' da ignorare.
+HTML_REGIONALI = """
+<html><body>
+<h3>Regionali 12/02/2023 Area ITALIA Regione LAZIO</h3>
+<table class="dati_riepilogo" summary='Riepilogo elezione'>
+<tr><th colspan='3'>Affluenza</th></tr>
+<tr><th>Elettori</th><td class='align_right'>4.791.612</td><td></td></tr>
+<tr><th>Votanti</th><td class='align_right'>1.782.656</td><td class='percentuale'>37,20 %</td></tr>
+</table>
+<table class="dati_riepilogo" summary='Riepilogo elezione'>
+<tr><th colspan='2'>Schede</th></tr>
+<tr><th>Bianche</th><td class='align_right'>10.594</td></tr>
+<tr><th>Non valide (bianche incl.)</th><td class='align_right'>45.111</td></tr>
+</table>
+<table class="dati table-striped" summary='Risultato elezione'>
+<thead><tr class='riga_testata'>
+<th colspan='3' class='align_left' id='hcandidato'>Candidati / Liste regionali e Liste circoscrizionali</th>
+<th class='align_right'></th><th class='align_center'></th>
+<th class='align_right' id='hvoti'>Voti</th>
+<th class='align_center' id='hpercentuale'>%</th>
+<th class='align_right' id='hseggi'>Seggi</th>
+</tr></thead>
+<tbody>
+<tr class='leader'>
+<td class='simbolo_leader'><img src="x.png" title="FRANCESCO ROCCA" alt="FRANCESCO ROCCA"/></td>
+<td headers='hcandidato' id="candidato0" scope='row'>ROCCA FRANCESCO <br /><span class='listino'>FRANCESCO ROCCA</span></td>
+<td class='text-left'>Eletto pres.</td><td class='align_right'></td><td class='align_center'></td>
+<td class='align_right vertical_align'>936.388</td><td class='percentuale vertical_percentuale'>53,89</td><td></td>
+</tr>
+<tr>
+<td class='simbolo_lista'></td><th class='candidato' id='lista0_0'>FRATELLI D'ITALIA</th>
+<td class='apparentamento'></td><td></td><td></td>
+<td class='align_right vertical_align'>520.731</td><td class='percentuale vertical_percentuale'>33,63</td><td class='align_right vertical_align'>22</td>
+</tr>
+<tr>
+<td class='simbolo_lista'></td><th class='candidato' id='lista0_1'>LEGA</th>
+<td class='apparentamento'></td><td></td><td></td>
+<td class='align_right vertical_align'>131.811</td><td class='percentuale vertical_percentuale'>8,51</td><td class='align_right vertical_align'>3</td>
+</tr>
+<tr class='totale_liste'>
+<td></td><td id='htotalecoalizione0'>Totale coalizione</td><td></td><td></td><td></td>
+<td class='align_right vertical_align'>856.966</td><td class='percentuale vertical_percentuale'>55,35</td><td class='align_right vertical_align'>30</td>
+</tr>
+<tr class='leader'>
+<td class='simbolo_leader'><img src="x.png" title="ALESSIO D'AMATO" alt="ALESSIO D'AMATO"/></td>
+<td headers='hcandidato' id="candidato1" scope='row'>D'AMATO ALESSIO <br /><span class='listino'>ALESSIO D'AMATO</span></td>
+<td class='text-left'>Eletto cons.</td><td class='align_right'></td><td class='align_center'></td>
+<td class='align_right vertical_align'>581.974</td><td class='percentuale vertical_percentuale'>33,49</td><td></td>
+</tr>
+<tr>
+<td class='simbolo_lista'></td><th class='candidato' id='lista1_0'>PARTITO DEMOCRATICO</th>
+<td class='apparentamento'></td><td></td><td></td>
+<td class='align_right vertical_align'>313.658</td><td class='percentuale vertical_percentuale'>20,26</td><td class='align_right vertical_align'>10</td>
+</tr>
+<tr class='totale_liste'>
+<td></td><td id='htotalecoalizione1'>Totale coalizione</td><td></td><td></td><td></td>
+<td class='align_right vertical_align'>519.761</td><td class='percentuale vertical_percentuale'>33,57</td><td class='align_right vertical_align'>14</td>
+</tr>
+<tr class='totalecomplessivovoti'>
+<td class='align_left' id='htotalecomplessivovoti'>TOTALE</td>
+<td id='htotale'>CANDIDATI | LISTE REGIONALI</td><td></td><td></td>
+<td class='align_right vertical_align'>1.737.545</td><td></td><td></td>
+</tr>
+<tr class='totalecomplessivovoti'>
+<td id='htotale'>LISTE CIRCOSCRIZIONALI</td><td></td><td></td>
+<td class='align_right vertical_align'>1.548.288</td><td></td>
+<td class='align_right vertical_align'>49</td>
+</tr>
+</tbody>
+</table>
+</body></html>
+"""
+
+
+def test_parse_regionali():
+    r = parse_risultati(HTML_REGIONALI)
+    assert r["elettori"] == 4791612
+    assert r["votanti"] == 1782656
+    assert r["affluenza_pct"] == 37.20
+    assert r["bianche"] == 10594
+    assert r["non_valide"] == 45111
+    assert len(r["candidati"]) == 2
+    rocca, damato = r["candidati"]
+    # nome presidente dal <span class='listino'> (NOME COGNOME)
+    assert rocca["candidato"] == "FRANCESCO ROCCA"
+    assert rocca["eletto"] is True
+    assert rocca["voti_candidato"] == 936388
+    assert rocca["pct_candidato"] == 53.89
+    assert [l["lista"] for l in rocca["liste"]] == ["FRATELLI D'ITALIA", "LEGA"]
+    assert rocca["liste"][0]["voti"] == 520731
+    assert rocca["liste"][0]["pct"] == 33.63
+    assert rocca["liste"][0]["seggi"] == 22
+    assert damato["candidato"] == "ALESSIO D'AMATO"
+    assert damato["eletto"] is True
+    assert damato["voti_candidato"] == 581974
+    assert damato["liste"][0]["lista"] == "PARTITO DEMOCRATICO"
+    assert damato["liste"][0]["seggi"] == 10
+    # nessun candidato fittizio ricavato dalle righe di totale
+    nomi = [c["candidato"] for c in r["candidati"]]
+    assert "LISTE CIRCOSCRIZIONALI" not in nomi
+    assert "Totale coalizione" not in nomi
+
+
+def test_parse_candidati_regionali_diretto():
+    cand = parse_candidati_regionali(HTML_REGIONALI)
+    assert len(cand) == 2
+    assert cand[0]["candidato"] == "FRANCESCO ROCCA"
+    assert cand[1]["candidato"] == "ALESSIO D'AMATO"
+
+
+FIXTURE_REGIONALI = Path(__file__).parent / "fixtures" / "regionali_2023_lazio.html"
+
+
+@pytest.mark.skipif(not FIXTURE_REGIONALI.exists(),
+                    reason="fixture reale regionali assente")
+def test_parse_regionali_fixture_reale():
+    html = FIXTURE_REGIONALI.read_text(encoding="utf-8")
+    r = parse_risultati(html)
+    assert len(r["candidati"]) == 5
+    nomi = [c["candidato"] for c in r["candidati"]]
+    assert nomi == ["FRANCESCO ROCCA", "ALESSIO D'AMATO", "DONATELLA BIANCHI",
+                    "SONIA PECORILLI", "ROSA RINALDI"]
+    assert "LISTE CIRCOSCRIZIONALI" not in nomi
+    rocca = r["candidati"][0]
+    assert rocca["eletto"] is True
+    assert rocca["voti_candidato"] == 936388
+    assert rocca["pct_candidato"] == 53.89
+    assert rocca["liste"][0]["lista"] == "FRATELLI D'ITALIA"
+    assert rocca["liste"][0]["seggi"] == 22
+    assert len(rocca["liste"]) == 6
+    damato = r["candidati"][1]
+    assert damato["eletto"] is True
+    assert damato["voti_candidato"] == 581974
+    rinaldi = r["candidati"][4]
+    assert rinaldi["eletto"] is False
+    assert rinaldi["voti_candidato"] == 15361
+    assert rinaldi["pct_candidato"] == 0.88

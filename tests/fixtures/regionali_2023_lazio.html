@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+<html lang="it" dir="ltr" xmlns:og="http://opengraphprotocol.org/schema/">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<link rel="shortcut icon"
+		href="https://elezionistorico.interno.gov.it/favicon.ico"
+		type="image/vnd.microsoft.icon" />
+	<title>Eligendo Archivio - Ministero dell'Interno DAIT</title>
+	<meta name="description"
+		content="Eligendo | Archivio storico elettorale | Consulta i risultati elettorali dal 1948 in poi su Eligendo - Il portale delle elezioni del Ministero dell'Interno">
+	<meta name="keywords"
+		content="elezioni, politiche e regionali, elezioni, referendum, europee, regionali, comunali, politiche, risultati elettorali, eligendo, ministero interno, viminale">
+	<link rel="image_src"
+		href="https://elezionistorico.interno.gov.it/weblib/images/eligendo.png" />
+
+	<!-- SOCIAL -->
+	<meta property="og:site_name" content="Eligendo" />
+	<meta property="og:title" content="Eligendo Archivio - Ministero dell'Interno DAIT" />
+	<meta property="og:url" content="https://elezionistorico.interno.gov.it" />
+	<meta property="og:description"
+		content="Eligendo | Archivio storico elettorale | Consulta i risultati elettorali dal 1948 in poi su Eligendo - Il portale delle elezioni del Ministero dell'Interno" />
+	<meta property="og:image"
+		content="https://elezionistorico.interno.gov.it/weblib/images/eligendo.png" />
+	<meta property="og:image:alt" content="Eligendo" />
+	<meta property="og:type" content="website" />
+
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="Eligendo Archivio - Ministero dell'Interno DAIT" />
+	<meta name="twitter:description"
+		content="Eligendo | Archivio storico elettorale | Consulta i risultati elettorali dal 1948 in poi su Eligendo - Il portale delle elezioni del Ministero dell'Interno" />
+	<meta name="twitter:url" content="https://elezionistorico.interno.gov.it" />
+	<meta name="twitter:image"
+		content="https://elezionistorico.interno.gov.it/weblib/images/eligendo.png" />
+
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="/weblib/css/jquery-ui.min.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/font-awesome.min.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/slidepushmenus-component.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/slidepushmenus-default.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/easy-autocomplete.min.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/datatables.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/buttons.datatables.css" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="/weblib/css/eligendo.css" />
+
+	<!-- CSS storico -->
+	<link rel="stylesheet" type="text/css" href="/css/eligendo-archivio.css" />
+
+	<!-- CSS stampa -->
+	<link rel="stylesheet" type="text/css" href="/css/eligendo-archivio-stampa.css" media="print" />
+	<link rel="stylesheet" type="text/css" href="/weblib/css/eligendo-stampa.css" media="print" />
+
+	<script type="application/ld+json">
+		{
+			"@context": "http://schema.org",
+			"@type": "Organization",
+			"url": "https://elezionistorico.interno.gov.it",
+			"name": "Eligendo: speciale elezioni",
+			"image": "https://elezionistorico.interno.gov.it/weblib/images/eligendo.png",
+			"description": "Eligendo | Archivio storico elettorale | Consulta i risultati elettorali dal 1948 in poi su Eligendo - Il portale delle elezioni del Ministero dell'Interno",
+			"logo": "https://elezionistorico.interno.gov.it/weblib/images/logo-eligendo_blu.svg",
+			"contactPoint": {
+				"@type": "ContactPoint",
+				"telephone": "+3946501",
+				"contactType": "technical support"
+			}
+		}
+	</script>
+
+		<script>
+		(function() {
+			if (window.addEventListener) {
+				window.addEventListener("load", nascondi_loading_screen, false);
+			} else {
+				window.attachEvent("onload", nascondi_loading_screen);
+			}
+		})();
+
+		function nascondi_loading_screen() {
+			document.getElementById("loading_screen").style.display = 'none';
+		}
+	</script>
+</head>
+
+<body
+	class="html navbar-is-fixed-top notfront paginaArchivio notfront"
+	onload="">
+	<!--[if lt IE 8]>
+			<p class=chromeframe>Il tuo browser &egrave; <em>obsoleto!</em> <a href="https://browsehappy.com/">Aggiornalo</a> per vedere questo sito.</p>
+        <![endif]-->
+
+	<!-- back to top -->
+	<a id="top"></a>
+
+	<a class="sr-only sr-only-focusable" href="#main-content">Vai al contenuto della pagina</a>
+	<div id="fb-root"></div><div id="headerContainer">
+
+	<!-- BURGER -->
+	<div class="Header-toggle Grid-cell">
+		<a class="Hamburger-toggleContainer js-fr-offcanvas-open u-nojsDisplayInlineBlock" href="#sideMenu"
+			aria-controls="sideMenu" aria-label="accedi al menu" title="accedi al menu"
+			onclick="$('#sideMenu').removeAttr('style');">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		</a>
+	</div>
+
+	<!-- MENU LATERALE -->
+	<section class="Offcanvas Offcanvas--left Offcanvas--modal js-fr-offcanvas u-hiddenPrint" id="sideMenu"
+		style="display:none;">
+		<h2 class="u-hiddenVisually">Menu di navigazione</h2>
+		<div class="Offcanvas-content u-background-white">
+			<div class="Offcanvas-toggleContainer u-background-70 u-jsHidden">
+				<a class="Hamburger-toggleContainer u-block u-color-white u-padding-bottom-xxl u-padding-left-s u-padding-top-xxl js-fr-offcanvas-close"
+					aria-controls="sideMenu" aria-label="esci dalla navigazione" title="esci dalla navigazione"
+					href="#">
+					<span class="Hamburger-toggle is-active" aria-hidden="true"></span>
+				</a>
+			</div>
+			<nav>
+				<ul class="Linklist Linklist--padded Treeview Treeview--default js-Treeview u-text-r-xs">
+					
+					<li class="">
+						<a href="/daithome/elezionihome" class="">
+							Eligendo						</a>
+											</li>
+					
+					<li class="subitem ">
+						<a href="/daithome/elezionihome/eligendo" class="">
+							Live						</a>
+											</li>
+					
+					<li class="active subitem ">
+						<a href="/" class="">
+							L'Archivio						</a>
+												<ul class="subrow">
+														<li class="">
+								<a href="/" class="">
+
+									Consultazione								</a>
+															</li>
+																					<li class="">
+								<a href="/info.php" class="">
+
+									<span class="fa fa-info-circle fa-lg"></span> Info								</a>
+															</li>
+																				</ul>
+											</li>
+					
+					<li class="subitem ">
+						<a href="/eligendo/opendata.php" class="">
+							Open data						</a>
+											</li>
+					
+					<li class="subitem ">
+						<a href="/eligendo/appmobile.php" class="">
+							Mobile						</a>
+											</li>
+					
+					<li class="subitem ">
+						<a href="/eligendo/salastampa.php" class="">
+							Sala stampa						</a>
+											</li>
+					
+					<li class="">
+						<a href="/daithome/elezioni" class="">
+							DAIT - Elezioni						</a>
+											</li>
+					
+					<li class="">
+						<a href="https://www.interno.gov.it" class="">
+							Ministero dell'Interno						</a>
+											</li>
+									</ul>
+			</nav>
+		</div>
+	</section>
+
+	<!-- LOGO -->
+	<div id="logoContainer">
+		<a
+			href="/daithome/elezionihome">
+			<div class="row visible-print-block">
+				<img class="logoEligendo" src="/weblib/images/logo-eligendo_blu.svg">
+			</div>
+			<div class="row hidden-print">
+				<img class="logoEligendo" src="/weblib/images/logo-eligendo.svg">
+			</div>
+		</a>
+	</div>
+
+		<!-- TITOLO -->
+	<div class="container sottotitolo">
+		<div id="descElez" class="box-title opopo">
+			<p>L'Archivio			</p>
+		</div>
+	</div>
+	</div>
+
+<!-- MENU ALTO -->
+<div id="second-row">
+	<div class="container">
+		<nav id="topmenu" class="navbar">
+			<div class="container-fluid">
+				
+				<!-- TITOLO -->
+				<!-- <div class="container sottotitolo"> -->
+				<div class="sottotitolo">
+					<div id="descElez" class="box-title">
+						<p>L'Archivio						</p>
+					</div>
+				</div>
+				<ul class="nav navbar-nav">
+					
+					<li class="active ">
+						<a href="/" class="">
+							Consultazione						</a>
+									</li>
+			
+					<li class="">
+						<a href="/info.php" class="">
+							Info						</a>
+									</li>
+						</ul>
+			<ul id="socialMenuSmall" class="nav navbar-nav nav-social navbar-right">
+				<li class="li-menu">
+					<a class="dropdown-toggle condividi" data-toggle="dropdown" href="#">
+						<span class="fa fa-share-alt"></span>
+						<span id="condividi"></span>
+					</a>
+					<ul class="dropdown-menu nav-top down-menu">
+						<li class="li-social">
+							<a href="https://www.facebook.com/sharer/sharer.php?u=https://elezionistorico.interno.gov.it&amp;src=sdkpreparse"
+								class="btn btn-block btn-social btn-facebook" target="_blank">
+								<span class="fa fa-facebook"
+									data-href="https://elezionistorico.interno.gov.it"
+									data-layout="
+									box_count" data-size="small" data-mobile-iframe="false"></span>
+							</a>
+						</li>
+						<li class="li-social">
+							<a href="https://twitter.com/share?url=https:;//elezionistorico.interno.gov.it&amp;text=Eligendo&amp;hashtags=Eligendo"
+								class="btn btn-block btn-social btn-twitter" target="_blank">
+								<span class="fa fa-twitter"> </span>
+							</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</nav>
+	</div>
+
+</div>
+
+<div class='container paginaInterna'>
+    <div class="row">
+
+        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3" id="sidebarLeft" role="navigation">
+
+            <div class='row election_bg'>
+                <p>Elezione</p>
+
+                <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <input class="form-check-input" type="radio" name="tpel"  onclick="document.location.href='/index.php?tpel=A'" value="A" id="assemblea">
+                    <label for="assemblea">Assemblea Costituente</label>
+                </div>
+
+                <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <input class="form-check-input" type="radio" name="tpel"  onclick="document.location.href='/index.php?tpel=C'" value="C" id="camera">
+                    <label for="camera">Camera</label>
+                </div>
+
+                <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <input class="form-check-input" type="radio" name="tpel"  onclick="document.location.href='/index.php?tpel=S'" value="S" id="senato">
+                    <label for="senato">Senato</label>
+                    </input>
+                </div>
+
+                <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <input class="form-check-input" type="radio" name="tpel"  onclick="document.location.href='/index.php?tpel=E'" value="E" id="europee">
+                    <label for="europee">Europee</label>
+                    </input>
+                </div>
+
+                <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <input class="form-check-input" type="radio" name="tpel"  onclick="document.location.href='/index.php?tpel=F'" value="F" id="referendum">
+                    <label for="referendum">Referendum</label>
+                    </input>
+                </div>
+
+                <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <input class="form-check-input" type="radio" name="tpel" checked='checked' onclick="document.location.href='/index.php?tpel=R'" value="R" id="regionali">
+                    <label for="regionali">Regionali</label>
+                    </input>
+                </div>
+
+                <div class="form-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <input class="form-check-input" type="radio" name="tpel"  onclick="document.location.href='/index.php?tpel=P'" value="P" id="provinciali">
+                    <label for="provinciali">Provinciali</label>
+                    </input>
+                </div>
+
+                <div class="form-group col-xs-12 col-md-12 col-md-12 col-lg-12">
+                    <input class="form-check-input" type="radio" name="tpel"  onclick="document.location.href='/index.php?tpel=G'" value="G" id="comunali">
+                    <label for="comunali">Comunali</label>
+                    </input>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs nav_nav_search" id="myTab" role="tablist">
+                <li
+                    class="nav-item item-navig active in">
+                    <a class="nav-link active" id="tab_nav" data-toggle="tab" href="#div_nav" role="tab"
+                        aria-controls="div_nav" aria-selected="true">
+                        <span class="fa fa-list-ul" aria-hidden="true"></span>
+                    </a>
+                </li>
+                <li
+                    class="nav-item item-search ">
+                    <a class="nav-link" id="tab_search" data-toggle="tab" href="#div_search" role="tab"
+                        aria-controls="div_search" aria-selected="false">
+                        <span class="fa fa-search" aria-hidden="true"></span>
+                    </a>
+                </li>
+            </ul>
+
+                        <div class="tab-content" id="tab_content">
+
+                
+                
+                <div class="tab-pane fade "
+                    id="div_search" role="tabpanel" aria-labelledby="tab_search">
+                    <!-- PRIMO TAB ricerca ente candidato -->
+                    <form action="index.php" id="invio" name="invio" method="get" onsubmit="return valida()">
+                        <div class="row">
+                            <div class="search_bg searchbox" id="tab_search">
+                                <!-- <div class="searchbox"> -->
+                                <div class="col-lg-12 input-group search_1">
+                                    <!-- <label>Ente</label> -->
+                                    <!-- <span class="fa fa-map-marker" aria-hidden="true"></span> -->
+                                    <span class="input-group-addon"><span class="fa fa-map-marker"
+                                            aria-hidden="true"></span></span></span>
+                                    <input id="testoEnte" name="testoEnte"                                     class="form-control" value="Cerca per ente..."
+                                    onfocus="if (this.value=='Cerca per ente...') this.value=''"
+                                    onblur="if (this.value=='') this.value='Cerca per ente...'" />
+                                    <button id="inviaEnte"                                         class="btn-primary invia"
+                                        type="submit" name="inviaEnte" value="">
+                                        <span class="fa fa-search" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+
+                                <div class="col-lg-12 input-group search_2">
+                                    <!-- <label>Candidato</label> -->
+                                    <!-- <span class="fa fa-user" aria-hidden="true"></span> -->
+                                    <span class="input-group-addon"><span class="fa fa-user"
+                                            aria-hidden="true"></span></span>
+                                    <input id="testoCand" name="testoCand"                                     class="form-control" value="Cerca per candidato..."
+                                    onfocus="if (this.value=='Cerca per candidato...') this.value=''"
+                                    onblur="if (this.value=='') this.value='Cerca per candidato...'" />
+                                    <button id="inviaCand"                                         class="btn-primary invia"
+                                        type="submit" name="inviaCand" value="">
+                                        <span class="fa fa-search" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+
+                                <input type="hidden" name="tpel"
+                                    value="R">
+                                <input type="hidden" name="scelta" value="">
+                                <input type="hidden" name="testo" value="">
+
+                                <!-- </div> -->
+                            </div>
+                        </div>
+                    </form>
+                </div> <!-- chiude il tab-pane della ricerca ente candidato-->
+
+                <div class="tab-pane fade active in" id="div_nav" role="tabpanel" aria-labelledby="tab_nav"><div class='row nav_bg'><div class="col-lg-12 col-md-12 col-sm-6 col-xs-12"><label class="select-des">Data</label><select name="sel_date"  class="form-control selected " id="sel_date" onchange="carica_pagina('index.php?tpel=R','dtel',this.options[this.selectedIndex].value);"><option value="0" class="selected ">Scegli Data</option><option value="23/11/2025" >23/11/2025</option><option value="12/10/2025" >12/10/2025</option><option value="05/10/2025" >05/10/2025</option><option value="17/11/2024" >17/11/2024</option><option value="27/10/2024" >27/10/2024</option><option value="09/06/2024" >09/06/2024</option><option value="21/04/2024" >21/04/2024</option><option value="10/03/2024" >10/03/2024</option><option value="12/02/2023" selected="selected">12/02/2023</option><option value="03/10/2021" >03/10/2021</option><option value="20/09/2020" >20/09/2020</option><option value="26/01/2020" >26/01/2020</option><option value="27/10/2019" >27/10/2019</option><option value="26/05/2019" >26/05/2019</option><option value="24/03/2019" >24/03/2019</option><option value="10/02/2019" >10/02/2019</option><option value="04/03/2018" >04/03/2018</option><option value="31/05/2015" >31/05/2015</option><option value="23/11/2014" >23/11/2014</option><option value="25/05/2014" >25/05/2014</option><option value="17/11/2013" >17/11/2013</option><option value="24/02/2013" >24/02/2013</option><option value="16/10/2011" >16/10/2011</option><option value="28/03/2010" >28/03/2010</option><option value="14/12/2008" >14/12/2008</option><option value="05/11/2006" >05/11/2006</option><option value="17/04/2005" >17/04/2005</option><option value="03/04/2005" >03/04/2005</option><option value="11/11/2001" >11/11/2001</option><option value="16/04/2000" >16/04/2000</option><option value="23/04/1995" >23/04/1995</option><option value="06/05/1990" >06/05/1990</option><option value="12/05/1985" >12/05/1985</option><option value="08/06/1980" >08/06/1980</option><option value="15/06/1975" >15/06/1975</option><option value="07/06/1970" >07/06/1970</option></select></div><div class="col-lg-12 col-md-12 col-sm-6 col-xs-12"><label class="select-des">Area</label><select name="sel_aree"  class="form-control selected " id="sel_aree" onchange="carica_pagina('index.php?tpel=R&dtel=12/02/2023&es0=S','tpa',this.options[this.selectedIndex].value);"><option value="0" class="selected ">Scegli Area</option>"<option value="I-lev00-levsut00-msN-tpeA" selected="selected" >ITALIA</option></select></div><div class="col-lg-12 col-md-12 col-sm-6 col-xs-12"><label class="select-des">Regione</label><select name="sel_sezione2"  class="form-control selected " id="sel_sezione2" onchange="carica_pagina('index.php?tpel=R&dtel=12/02/2023&tpa=I&tpe=R&lev0=0&levsut0=0&levsut1=1&es0=S&es1=S&ms=S','ne1',this.options[this.selectedIndex].value);"><option value="0" class="selected ">Scegli Regione</option><option value="12-lev112" selected="selected">LAZIO</option><option value="3-lev13" >LOMBARDIA</option></select></div><div class="col-lg-12 col-md-12 col-sm-6 col-xs-12"><label class="select-des">Circoscrizione</label><select name="sel_sezione3"  class="form-control active " id="sel_sezione3" onchange="carica_pagina('index.php?tpel=R&dtel=12/02/2023&tpa=I&tpe=I&lev0=0&levsut0=0&lev1=12&levsut1=1&levsut2=2&ne1=12&es0=S&es1=S&es2=S&ms=S','ne2',this.options[this.selectedIndex].value);"><option value="0" class="active ">Scegli Circoscrizione</option>"<option value="33-lev233" >FROSINONE</option>"<option value="40-lev240" >LATINA</option>"<option value="69-lev269" >RIETI</option>"<option value="70-lev270" >ROMA</option>"<option value="91-lev291" >VITERBO</option></select></div><div class="col-lg-12 col-md-12 col-sm-6 col-xs-12"><label class="select-des">Provincia</label><select name="sel_sezione4" disabled class="form-control disabled" id="sel_sezione4" onchange="carica_pagina('','ne3',this.options[this.selectedIndex].value);"><option value="0" class="">Scegli Provincia</option></select></div><div class="col-lg-12 col-md-12 col-sm-6 col-xs-12"><label class="select-des">Comune</label><select name="sel_sezione5" disabled class="form-control disabled" id="sel_sezione5" onchange="carica_pagina('','ne4',this.options[this.selectedIndex].value);"><option value="0" class="">Scegli Comune</option></select></div></div></div></div></div><div class='col-xs-12 col-sm-12 col-md-8 col-lg-9'><div id="loading_screen">
+  <img src="/weblib/images/caricamento.gif" alt="Caricamento..."> 
+</div><div class="center-panel"><div id="headEnti"><h3>Regionali 12/02/2023 <i class="fa fa-caret-right" aria-hidden="true"></i> Area ITALIA <i class="fa fa-caret-right" aria-hidden="true"></i> Regione LAZIO</h3></div><div class='row box_elevot'><div class='col-lg-6 col-md-6 col-sm-12 col-xs-12'><table class="dati_riepilogo" summary='Riepilogo elezione'><tr><th colspan='3' class='text-left box_elevot_title'>Affluenza</th></tr><tr><th id='helettori' scope='row'>Elettori</th><td class='align_right' headers='helettori'>4.791.612</td><td></td></tr><tr><th id='hvotanti' scope='row'>Votanti</th><td class='align_right' headers='hvotanti'>1.782.656</td><td class='percentuale' headers='hvotanti'>  37,20 %</td></tr></table></div><div class='col-lg-6 col-md-6 col-sm-12 col-xs-12 box_schede'><table class="dati_riepilogo" summary='Riepilogo elezione'><tr><th colspan='2' class='text-left box_elevot_title'>Schede</th></tr><tr><th id='hskbianche' scope='row'>Bianche</th><td class='align_right' headers='hskbianche'>10.594</td></tr><tr><th id='hsknonvalideR' scope='row'>Non valide (bianche incl.)</th><td class='align_right' headers='hsknonvalide'>45.111</td></tr></table></div></div><div class="table-responsive"><table class="dati table-striped" summary='Risultato elezione'><thead><tr class='riga_testata'><th colspan='3' class='align_left' scope='col' id='hcandidato'>Candidati / Liste regionali e Liste circoscrizionali</th><th class='align_right'></th><th class='align_center'></th><th class='align_right' scope='col' id='hvoti'>Voti</th><th class='align_center' id='hpercentuale' abbr='percentuale'>%</th><th class='align_right' scope='col' id='hseggi'>Seggi</th></tr></thead><tbody><tr class='leader'><td class='simbolo_leader'><img src="/contrassegni_se/C/C633424713A420FA73A0F37AAAF9E39C.png" title="FRANCESCO ROCCA" alt="FRANCESCO ROCCA"/></td><td headers='hcandidato' id="candidato0" scope='row'>ROCCA FRANCESCO  <br /><span class='listino'>FRANCESCO ROCCA</span></td><td class='text-left'>Eletto pres.</td><td class='align_right'></td><td class='align_center'></td><td class='align_right vertical_align' headers="hvoti candidato0">936.388</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato0">53,89</td><td></td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/1/1B1D92E3F3A8B3FBC54A937F9E5F85BA.png" title="FRATELLI D'ITALIA" alt="FRATELLI D'ITALIA"/></td><th id="lista0_0" headers="hlista candidato0" scope='row' class='candidato'>FRATELLI D'ITALIA</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato0 lista0_0">520.731</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato0 lista0_0">33,63</td><td class='align_right vertical_align' headers="hseggi candidato0 lista0_0">22</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/0/079636821904A610D3164FFE3E32D993.png" title="LEGA" alt="LEGA"/></td><th id="lista0_1" headers="hlista candidato0" scope='row' class='candidato'>LEGA</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato0 lista0_1">131.811</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato0 lista0_1">8,51</td><td class='align_right vertical_align' headers="hseggi candidato0 lista0_1">3</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/D/D981B446385A5862DDAA3A0740EB6AD6.png" title="FORZA ITALIA" alt="FORZA ITALIA"/></td><th id="lista0_2" headers="hlista candidato0" scope='row' class='candidato'>FORZA ITALIA</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato0 lista0_2">130.566</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato0 lista0_2">8,43</td><td class='align_right vertical_align' headers="hseggi candidato0 lista0_2">3</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/B/BC6993CB1674DE88726903747B364D8A.png" title="LISTA CIVICA FRANCESCO ROCCA PRESIDENTE" alt="LISTA CIVICA FRANCESCO ROCCA PRESIDENTE"/></td><th id="lista0_3" headers="hlista candidato0" scope='row' class='candidato'>LISTA CIVICA FRANCESCO ROCCA PRESIDENTE</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato0 lista0_3">31.452</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato0 lista0_3">2,03</td><td class='align_right vertical_align' headers="hseggi candidato0 lista0_3">1</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/3/36E038A464C6200F46433CCA9E271115.png" title="UNIONE DI CENTRO" alt="UNIONE DI CENTRO"/></td><th id="lista0_4" headers="hlista candidato0" scope='row' class='candidato'>UNIONE DI CENTRO</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato0 lista0_4">25.000</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato0 lista0_4">1,61</td><td class='align_right vertical_align' headers="hseggi candidato0 lista0_4">1</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/F/F5660E9896EA5AB5AEA6E1AB4E716175.png" title="NOI MODERATI - RINASCIMENTO SGARBI" alt="NOI MODERATI - RINASCIMENTO SGARBI"/></td><th id="lista0_5" headers="hlista candidato0" scope='row' class='candidato'>NOI MODERATI - RINASCIMENTO SGARBI</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato0 lista0_5">17.406</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato0 lista0_5">1,12</td><td class='align_right'></td></tr><tr class='totale_liste'><td></td><td id="htotalecoalizione0" scope='row' headers="candidato0">Totale coalizione</td><td></td><td></td><td></td><td class='align_right vertical_align' headers="htotalecoalizione0 hvoti candidato0">856.966</td><td class='percentuale vertical_percentuale' headers="htotalecoalizione0 hpercentuale candidato0">55,35</td><td class='align_right vertical_align' headers="htotalecoalizione0 hseggi candidato0">30</td></tr><tr class='leader'><td class='simbolo_leader'><img src="/contrassegni_se/A/A7DA1C8996B514F1AC0D61B0DBF7FC9F.png" title="ALESSIO D'AMATO" alt="ALESSIO D'AMATO"/></td><td headers='hcandidato' id="candidato1" scope='row'>D'AMATO ALESSIO <br /><span class='listino'>ALESSIO D'AMATO</span></td><td class='text-left'>Eletto cons.</td><td class='align_right'></td><td class='align_center'></td><td class='align_right vertical_align' headers="hvoti candidato1">581.974</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1">33,49</td><td></td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/E/EA8A2D318FC53C40016414382DAB5FD1.png" title="PARTITO DEMOCRATICO" alt="PARTITO DEMOCRATICO"/></td><th id="lista1_0" headers="hlista candidato1" scope='row' class='candidato'>PARTITO DEMOCRATICO</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato1 lista1_0">313.658</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1 lista1_0">20,26</td><td class='align_right vertical_align' headers="hseggi candidato1 lista1_0">10</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/C/CB66AEA5FF9C8BB49AB43C9832CC5CF1.png" title="AZIONE - ITALIA VIVA" alt="AZIONE - ITALIA VIVA"/></td><th id="lista1_1" headers="hlista candidato1" scope='row' class='candidato'>AZIONE - ITALIA VIVA</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato1 lista1_1">75.306</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1 lista1_1">4,86</td><td class='align_right vertical_align' headers="hseggi candidato1 lista1_1">2</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/8/86DA2A0F7FBB35AFC972B59ECAE09486.png" title="LISTA CIVICA D'AMATO PRESIDENTE" alt="LISTA CIVICA D'AMATO PRESIDENTE"/></td><th id="lista1_2" headers="hlista candidato1" scope='row' class='candidato'>LISTA CIVICA D'AMATO PRESIDENTE</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato1 lista1_2">47.194</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1 lista1_2">3,05</td><td class='align_right vertical_align' headers="hseggi candidato1 lista1_2">1</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/5/59B812E69EA69B14DFFECCE441BE9365.png" title="VERDI E SINISTRA - EUROPA VERDE - POSSIBILE" alt="VERDI E SINISTRA - EUROPA VERDE - POSSIBILE"/></td><th id="lista1_3" headers="hlista candidato1" scope='row' class='candidato'>VERDI E SINISTRA - EUROPA VERDE - POSSIBILE</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato1 lista1_3">42.330</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1 lista1_3">2,73</td><td class='align_right vertical_align' headers="hseggi candidato1 lista1_3">1</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/8/84C84E580654DE50EEDC65A7FC2BBF42.png" title="DEMOS DEMOCRAZIA SOLIDALE" alt="DEMOS DEMOCRAZIA SOLIDALE"/></td><th id="lista1_4" headers="hlista candidato1" scope='row' class='candidato'>DEMOS DEMOCRAZIA SOLIDALE</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato1 lista1_4">18.417</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1 lista1_4">1,19</td><td class='align_right'></td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/6/6B4F6BF2BF55083ED8080D56B303AE60.png" title="+EUROPA - RADICALI ITALIANI - VOLT" alt="+EUROPA - RADICALI ITALIANI - VOLT"/></td><th id="lista1_5" headers="hlista candidato1" scope='row' class='candidato'>+EUROPA - RADICALI ITALIANI - VOLT</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato1 lista1_5">14.870</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1 lista1_5">0,96</td><td class='align_right'></td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/A/AA773A4A87DDAFCCA56CCBC6B0DD7667.png" title="PARTITO SOCIALISTA ITALIANO" alt="PARTITO SOCIALISTA ITALIANO"/></td><th id="lista1_6" headers="hlista candidato1" scope='row' class='candidato'>PARTITO SOCIALISTA ITALIANO</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato1 lista1_6">7.986</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato1 lista1_6">0,52</td><td class='align_right'></td></tr><tr class='totale_liste'><td></td><td id="htotalecoalizione1" scope='row' headers="candidato1">Totale coalizione</td><td></td><td></td><td></td><td class='align_right vertical_align' headers="htotalecoalizione1 hvoti candidato1">519.761</td><td class='percentuale vertical_percentuale' headers="htotalecoalizione1 hpercentuale candidato1">33,57</td><td class='align_right vertical_align' headers="htotalecoalizione1 hseggi candidato1">14</td></tr><tr class='leader'><td class='simbolo_leader'><img src="/contrassegni_se/8/8B0C1B19A52C74A7215BBA3A3F5F3B46.png" title="DONATELLA BIANCHI" alt="DONATELLA BIANCHI"/></td><td headers='hcandidato' id="candidato2" scope='row'>BIANCHI DONATELLA <br /><span class='listino'>DONATELLA BIANCHI</span></td><td class='text-left'></td><td class='align_right'></td><td class='align_center'></td><td class='align_right vertical_align' headers="hvoti candidato2">186.860</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato2">10,75</td><td></td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/4/42D310B633382C8CEE0CF63E94FA910D.png" title="MOVIMENTO 5 STELLE" alt="MOVIMENTO 5 STELLE"/></td><th id="lista2_0" headers="hlista candidato2" scope='row' class='candidato'>MOVIMENTO 5 STELLE</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato2 lista2_0">132.267</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato2 lista2_0">8,54</td><td class='align_right vertical_align' headers="hseggi candidato2 lista2_0">4</td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/3/30200395DDD6ED81084FBB606400766C.png" title="POLO PROGRESSISTA DI SINISTRA & ECOLOGISTA" alt="POLO PROGRESSISTA DI SINISTRA & ECOLOGISTA"/></td><th id="lista2_1" headers="hlista candidato2" scope='row' class='candidato'>POLO PROGRESSISTA DI SINISTRA & ECOLOGISTA</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato2 lista2_1">18.760</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato2 lista2_1">1,21</td><td class='align_right vertical_align' headers="hseggi candidato2 lista2_1">1</td></tr><tr class='totale_liste'><td></td><td id="htotalecoalizione2" scope='row' headers="candidato2">Totale coalizione</td><td></td><td></td><td></td><td class='align_right vertical_align' headers="htotalecoalizione2 hvoti candidato2">151.027</td><td class='percentuale vertical_percentuale' headers="htotalecoalizione2 hpercentuale candidato2">9,75</td><td class='align_right vertical_align' headers="htotalecoalizione2 hseggi candidato2">5</td></tr><tr class='leader'><td class='simbolo_leader'><img src="/contrassegni_se/B/B2BCE8139804057E0ABD43817F94CD15.png" title="SONIA PECORILLI" alt="SONIA PECORILLI"/></td><td headers='hcandidato' id="candidato3" scope='row'>PECORILLI SONIA <br /><span class='listino'>SONIA PECORILLI</span></td><td class='text-left'></td><td class='align_right'></td><td class='align_center'></td><td class='align_right vertical_align' headers="hvoti candidato3">16.962</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato3">0,98</td><td></td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/C/CCB51472948C8CF210909F74F7EEF112.png" title="PARTITO COMUNISTA ITALIANO" alt="PARTITO COMUNISTA ITALIANO"/></td><th id="lista3_0" headers="hlista candidato3" scope='row' class='candidato'>PARTITO COMUNISTA ITALIANO</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato3 lista3_0">10.229</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato3 lista3_0">0,66</td><td class='align_right'></td></tr><tr class='leader'><td class='simbolo_leader'><img src="/contrassegni_se/5/58465B856C95997DC4FBF9B10EEBD9A8.png" title="ROSA RINALDI" alt="ROSA RINALDI"/></td><td headers='hcandidato' id="candidato4" scope='row'>RINALDI ROSA  <br /><span class='listino'>ROSA RINALDI</span></td><td class='text-left'></td><td class='align_right'></td><td class='align_center'></td><td class='align_right vertical_align' headers="hvoti candidato4">15.361</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato4">0,88</td><td></td></tr><tr><td class='simbolo_lista'><img src="/contrassegni_se/8/8782BDD58286017CA88A47FA466D460E.png" title="UNIONE POPOLARE" alt="UNIONE POPOLARE"/></td><th id="lista4_0" headers="hlista candidato4" scope='row' class='candidato'>UNIONE POPOLARE</th><td class='apparentamento'></td><td></td><td></td><td class='align_right vertical_align' headers="hvoti candidato4 lista4_0">10.305</td><td class='percentuale vertical_percentuale' headers="hpercentuale candidato4 lista4_0">0,67</td><td class='align_right'></td></tr><tr class='totalecomplessivovoti'><th id='htotalecomplessivovoti' class='align_left' scope='row' rowspan='2'>TOTALE</th><th colspan='2' id='htotale'> CANDIDATI | LISTE REGIONALI</th><td></td><td></td><td class='align_right vertical_align' headers='htotalecomplessivovoti hvoti'>1.737.545</td><td></td><td></td></tr><tr class='totalecomplessivovoti'><th colspan='2' id='htotale'  scope='row'>LISTE CIRCOSCRIZIONALI</th><td></td><td></td><td class='align_right vertical_align' headers='htotalecomplessivovotilista hvoti'>1.548.288</td><td></td><td class='align_right vertical_align' headers='htotalecomplessivovotilista hseggi'>49</td></tr></tbody></table></div></div></div></div></div>    <footer>
+                <div class="container-fluid copyright">
+            <div class="row">
+                <div class="col-lg-11 col-md-11 col-sm-10 col-xs-10 text-right copyright_text">
+                    <p>Eligendo è a cura del DAIT - Ministero
+                        dell'Interno<br />Direzione Centrale per i Servizi Elettorali - S.I.E.</p>
+                </div>
+                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2 text-left copyright_img">
+                    <img src="/weblib/images/e-logo-white.png" width="50px" />
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script type="text/javascript" src="/weblib/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/weblib/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/weblib/js/jquery.once.js"></script>
+    <script type="text/javascript" src="/weblib/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/weblib/js/modernizr.js"></script>
+    <script type="text/javascript" src="/weblib/js/IWT.min.js"></script>
+    <script type="text/javascript" src="/weblib/js/datatables.min.js"></script>
+    <script type="text/javascript" src="/weblib/js/datatables.buttons.js"></script>
+    <script type="text/javascript" src="/weblib/js/pdfmake.js"></script>
+    <script type="text/javascript" src="/weblib/js/vfs_fonts.js"></script>
+    <script type="text/javascript" src="/weblib/js/buttons.html5.js"></script>
+    <script type="text/javascript" src="/weblib/js/buttons.print.js"></script>
+    <script type="text/javascript" src="/weblib/js/jquery.mousewheel.js"></script>
+    <script type="text/javascript" src="/weblib/js/jquery.easy-autocomplete.min.js"></script>
+    <script type="text/javascript" src="/weblib/js/eligendo.js"></script>
+    
+    <!-- Scripts Storico -->
+    <script type="text/javascript" src="/js/eligendo-archivio.js"></script>
+
+    <script type="text/javascript">
+        var ENVIRONMENT = "";
+        inizializza();
+
+            </script>
+
+    
+<!-- Finestra modale -->
+        <div id="modWindow" class="modal fade bigModal" tabindex="-1" role="dialog" aria-labelledby="modWindowLabel" aria-hidden="true">
+			<div class="modal-dialog">
+			    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="fa fa-remove"></span> Chiudi</button>
+                        <h3 id="modWindowLabel">-</h3>
+	                </div>
+                    <div class="modal-body">
+                        <div id="modWindowSection"></div>
+                    </div>
+				</div>
+			</div>
+        </div>
+    <script>
+        $(document).ready(function() {
+            $("body .table-responsive td:contains(.)").attr("x-ms-format-detection", "none");
+        });
+    </script>
+
+    </body>
+
+    </html>
+    <!-- Thanks to HTML5 Boilerplate (http://html5boilerplate.com) Professional front-end template that helps you build fast, robust, adaptable, and future-proof websites -->
+    <!-- Thanks to jQuery (http://jquery.com) Fast, small, and feature-rich JavaScript library. -->
+    <!-- Thanks to Bootstrap (http://twitter.github.com/bootstrap) Sleek, intuitive, and powerful front-end framework for faster and easier web development. -->

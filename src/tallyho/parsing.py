@@ -165,6 +165,109 @@ def parse_candidati(tabelle: list) -> list:
 
 
 # --------------------------------------------------------------------------
+# Elezioni regionali: candidati presidente (righe class='leader') + liste
+# collegate (righe successive con cella class='candidato').
+# --------------------------------------------------------------------------
+
+_REGIONALI_MARK = re.compile(
+    r"class=['\"]leader['\"]|simbolo_leader|totalecomplessivovoti", re.I)
+
+
+def _e_regionali(html_page: str) -> bool:
+    """True se la pagina contiene la tabella risultati regionale
+    (righe 'leader' + totali di coalizione/complessivi)."""
+    return bool(_REGIONALI_MARK.search(html_page))
+
+
+def _classe_riga(attrs: str) -> str:
+    """Valore dell'attributo class di un tag (riga o cella), o stringa vuota."""
+    m = re.search(r"class=['\"]([^'\"]*)['\"]", attrs)
+    return m.group(1) if m else ""
+
+
+def _nome_leader(riga_html: str) -> str:
+    """Nome del candidato presidente: dal <span class='listino'> (NOME COGNOME)
+    se presente, altrimenti dal testo del td/th con id 'candidatoN'."""
+    m = re.search(
+        r"<span[^>]*class=['\"][^'\"]*\blistino\b[^'\"]*['\"][^>]*>(.*?)</span>",
+        riga_html, re.S)
+    if m:
+        nome = pulisci(m.group(1))
+        if nome:
+            return nome
+    m = re.search(r"<t[dh][^>]*id=['\"]candidato\d+['\"][^>]*>(.*?)</t[dh]>",
+                  riga_html, re.S)
+    return pulisci(m.group(1)) if m else ""
+
+
+def _parse_leader_regionale(riga_html: str) -> dict:
+    """Da una riga <tr class='leader'> estrae il candidato presidente."""
+    nome = _nome_leader(riga_html)
+    celle = [pulisci(c) for c in re.findall(
+        r"<t[dh][^>]*>(.*?)</t[dh]>", riga_html, re.S)]
+    eletto = any("eletto" in c.lower() for c in celle)
+    voti, pct = None, None
+    for c in celle:
+        if re.fullmatch(r"[\d.]+", c) and voti is None:
+            voti = int(c.replace(".", ""))
+        elif re.fullmatch(r"[\d,]+", c) and pct is None and "," in c:
+            pct = float(c.replace(",", "."))
+    return {"candidato": nome, "eletto": eletto,
+            "voti_candidato": voti, "pct_candidato": pct, "liste": []}
+
+
+def _lista_regionale(riga_html: str):
+    """Nome della lista (cella class='candidato') + celle della riga, o None
+    se la riga non è una lista collegata a un candidato."""
+    m = re.search(
+        r"<t[dh][^>]*class=['\"][^'\"]*\bcandidato\b[^'\"]*['\"][^>]*>(.*?)</t[dh]>",
+        riga_html, re.S)
+    if not m:
+        return None
+    nome = pulisci(m.group(1))
+    if not nome:
+        return None
+    celle = [pulisci(c) for c in re.findall(
+        r"<t[dh][^>]*>(.*?)</t[dh]>", riga_html, re.S)]
+    return nome, celle
+
+
+def parse_candidati_regionali(html_page: str) -> list:
+    """Candidati presidente (righe class='leader') e liste collegate.
+
+    Formato regionale (es. Lazio 12/02/2023): tabella class='dati' con header
+    'Candidati / Liste regionali e Liste circoscrizionali'. Ogni candidato
+    presidente è una riga class='leader' (nome nel <span class='listino'>,
+    voti/% nelle celle numeriche) seguita dalle liste collegate (celle
+    class='candidato') fino alla riga class='totale_liste' ('Totale
+    coalizione'). Le righe 'totale_liste' e 'totalecomplessivovoti' (totali
+    complessivi di lista) vanno ignorate.
+    """
+    risultati = []
+    m = re.search(
+        r"<table[^>]*class=['\"][^'\"]*\bdati\b[^'\"]*['\"][^>]*>(.*?)</table>",
+        html_page, re.S)
+    if not m:
+        return risultati
+    corpo = m.group(1)
+    corrente = None
+    for rm in re.finditer(r"<tr([^>]*)>(.*?)</tr>", corpo, re.S):
+        cls = _classe_riga(rm.group(1))
+        if "totale_liste" in cls or "totalecomplessivovoti" in cls:
+            continue
+        if "leader" in cls:
+            corrente = _parse_leader_regionale(rm.group(2))
+            risultati.append(corrente)
+            continue
+        lista = _lista_regionale(rm.group(2))
+        if lista is None or corrente is None:
+            continue
+        nome, celle = lista
+        corrente["liste"].append(estrai_lista(nome, celle[2:]))
+    return risultati
+
+
+# --------------------------------------------------------------------------
 # Referendum (un quesito per blocco: titolo + tabelle SI/NO)
 # --------------------------------------------------------------------------
 
@@ -261,7 +364,10 @@ def parse_risultati(html_page: str) -> dict:
     tabelle = estrai_tabelle(html_page)
     aff = parse_affluenza(tabelle)
     sch = parse_schede(tabelle)
-    cand = parse_candidati(tabelle)
+    if _e_regionali(html_page):
+        cand = parse_candidati_regionali(html_page)
+    else:
+        cand = parse_candidati(tabelle)
     return {
         "intestazione": intestazione,
         "turno": turno,
