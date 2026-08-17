@@ -305,3 +305,33 @@ tallyho/
 ## Licenza
 
 MIT
+
+## Citazione
+
+I dati esposti provengono dall'Archivio Storico delle Elezioni del
+Ministero dell'Interno (DAIT), fonte pubblica e ufficiale:
+[elezionistorico.interno.gov.it](https://elezionistorico.interno.gov.it).
+
+Chi utilizza TallyHo — o i dataset da esso generati — in ricerche,
+pubblicazioni, articoli, tesi o progetti accademici è tenuto a citare
+lo strumento, ad esempio come segue:
+
+> Peracchio, Jacopo (2026). *TallyHo*: serie storica elettorale italiana,
+> comune per comune (Versione 1.0.0) [Software].
+> https://github.com/jack89-ML/tallyho
+
+In BibTeX:
+
+```bibtex
+@software{TallyHo,
+  author = {Peracchio, Jacopo},
+  title = {{TallyHo}: serie storica elettorale italiana, comune per comune},
+  year = {2026},
+  version = {1.0.0},
+  url = {https://github.com/jack89-ML/tallyho}
+}
+```
+
+Il file `CITATION.cff` nella radice del repository abilita il pulsante
+**Cite this repository** su GitHub, che genera la citazione nei formati
+APA e BibTeX.
