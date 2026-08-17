@@ -30,6 +30,10 @@ tallyho = "tallyho.cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "ruff"]
+xlsx = ["openpyxl>=3.1"]
+parquet = ["pyarrow>=14"]
+yaml = ["pyyaml>=6"]
+all = ["openpyxl>=3.1", "pyarrow>=14", "pyyaml>=6"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

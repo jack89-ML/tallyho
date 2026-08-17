@@ -2,7 +2,7 @@
 
 import json
 
-from tallyho.export import esporta_csv, esporta_json
+from tallyho.export import esporta_csv, esporta_json, esporta_long
 
 RISULTATI = {
     "ROMA": [
@@ -89,3 +89,27 @@ def test_esporta_json_senza_dait(tmp_path):
     esporta_json(str(percorso), ["ROMA"], RISULTATI, [], generato="20260101_120000")
     payload = json.loads(percorso.read_text(encoding="utf-8"))
     assert "amministratori_dait" not in payload
+
+
+def test_esporta_long(tmp_path):
+    percorso = tmp_path / "elezioni_long.csv"
+    esporta_long(str(percorso), ["ROMA"], RISULTATI)
+    raw = percorso.read_bytes()
+    assert raw.startswith(b"\xef\xbb\xbf")  # BOM UTF-8
+    righe = percorso.read_text(encoding="utf-8-sig").splitlines()
+    header = righe[0].split(";")
+    assert header[:6] == ["data_elezione", "tipo", "turno", "comune",
+                          "provincia", "ambito"]
+    assert header[-1] == "seggi"
+    # 4 righe scheda (elettori/votanti/bianche/non_valide) + 1 candidato
+    # con lista + 1 candidato senza lista = 7 righe di dati
+    assert len(righe) == 8
+    # righe di livello scheda
+    assert "scheda;elettori;2359248;;;" in righe[1]
+    assert "scheda;votanti;1145268;48.54;;" in righe[2]
+    # riga candidato con lista
+    assert "candidato;GUALTIERI ROBERTO;299976;27.03;True;" in righe[5]
+    # riga lista
+    assert "lista;PARTITO DEMOCRATICO;166194;16.38;;18" in righe[6]
+    # candidato senza lista (seggi vuoto)
+    assert "candidato;MICHELLI ENRICO;299594;26.99;False;" in righe[7]

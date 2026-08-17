@@ -53,7 +53,8 @@ from datetime import datetime
 import requests
 
 from .costanti import BASE, TIPO_ETICHETTE, UA
-from .export import (esporta_csv, esporta_json, integra_dait,
+from .export import (esporta_csv, esporta_json, esporta_long,
+                     esporta_parquet, esporta_xlsx, integra_dait,
                      scarica_ammcom)
 from .navigazione import (leggi_date, leggi_onchange, leggi_select,
                           scendi_livello, trova_comune)
@@ -133,6 +134,46 @@ def esplora_livello(sessione, tipo, data, livello, nome_regione,
     return 0
 
 
+def _carica_config(path):
+    """Carica un file di configurazione TOML (o YAML se pyyaml presente).
+
+    Ritorna un dict con le chiavi = nomi lunghi delle opzioni CLI.
+    Gli argomenti passati esplicitamente a riga di comando hanno precedenza.
+    """
+    if not os.path.isfile(path):
+        print(f"[!] File di configurazione non trovato: {path}")
+        return {}
+    testo = open(path, encoding="utf-8").read()
+    # TOML (stdlib da Python 3.11; fallback a tomli se presente)
+    try:
+        import tomllib
+    except ImportError:  # Python < 3.11
+        try:
+            import tomli as tomllib
+        except ImportError:
+            tomllib = None
+    if tomllib is not None and path.endswith((".toml", ".tml")):
+        try:
+            return dict(tomllib.loads(testo))
+        except Exception as exc:  # noqa: BLE001
+            print(f"[!] TOML non valido ({exc}) — ignoro il config")
+            return {}
+    # YAML (opzionale, via pyyaml)
+    if path.endswith((".yaml", ".yml")):
+        try:
+            import yaml
+        except ImportError:
+            print("[!] Config YAML richiede pyyaml: pip install pyyaml")
+            return {}
+        try:
+            return dict(yaml.safe_load(testo) or {})
+        except Exception as exc:  # noqa: BLE001
+            print(f"[!] YAML non valido ({exc}) — ignoro il config")
+            return {}
+    print("[!] Estensione config non supportata (usare .toml o .yaml/.yml)")
+    return {}
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="TallyHo — ti porta a spasso nella storia elettorale italiana "
@@ -175,7 +216,35 @@ def main():
                          "ammcom.csv dal portale open data del Ministero "
                          "(con cache); oppure passa il percorso di un CSV "
                          "già scaricato")
+    ap.add_argument("--long", action="store_true",
+                    help="Esporta anche il CSV in formato LONG/TIDY "
+                         "normalizzato (una riga per osservazione, "
+                         "pronto per pandas/R): elezioni_<ts>_long.csv")
+    ap.add_argument("--xlsx", action="store_true",
+                    help="Esporta anche in Excel (.xlsx) — richiede "
+                         "openpyxl (pip install 'tallyho[xlsx]')")
+    ap.add_argument("--parquet", action="store_true",
+                    help="Esporta anche in Parquet — richiede pyarrow "
+                         "(pip install 'tallyho[parquet]')")
+    ap.add_argument("--config",
+                    help="File di configurazione TOML/YAML con i default "
+                         "degli argomenti (chiavi = nomi lunghi delle "
+                         "opzioni, es. comuni, tipo, out, sleep). Gli "
+                         "argomenti passati a riga di comando hanno "
+                         "precedenza sul file.")
     args = ap.parse_args()
+
+    # ---- config file: i default dal file valgono solo se l'opzione non
+    # è stata passata esplicitamente a riga di comando ----
+    if args.config:
+        cfg = _carica_config(args.config)
+        for chiave, valore in cfg.items():
+            if chiave in ("long", "xlsx", "parquet"):
+                # flag booleani: attivi solo se NON già impostati
+                if not getattr(args, chiave) and valore:
+                    setattr(args, chiave, True)
+            elif hasattr(args, chiave) and getattr(args, chiave) in (None, "", [], False):
+                setattr(args, chiave, valore)
 
     province = tuple(p.strip().upper() for p in args.province.split(",") if p.strip())
     os.makedirs(args.out, exist_ok=True)
@@ -277,6 +346,20 @@ def main():
     esporta_json(json_path, comuni, risultati, log, amministratori,
                  generato=ts)
     print(f"[+] JSON: {json_path}")
+
+    # ---- export aggiuntivi (long / xlsx / parquet) ----
+    if args.long:
+        long_path = os.path.join(args.out, f"elezioni_{ts}_long.csv")
+        esporta_long(long_path, comuni, risultati)
+        print(f"[+] LONG: {long_path}")
+    if args.xlsx:
+        xlsx_path = os.path.join(args.out, f"elezioni_{ts}.xlsx")
+        esporta_xlsx(xlsx_path, comuni, risultati)
+        print(f"[+] XLSX: {xlsx_path}")
+    if args.parquet:
+        parquet_path = os.path.join(args.out, f"elezioni_{ts}.parquet")
+        esporta_parquet(parquet_path, comuni, risultati)
+        print(f"[+] PARQUET: {parquet_path}")
 
     # ---- riepilogo ----
     for comune in comuni:

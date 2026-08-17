@@ -58,6 +58,117 @@ def esporta_json(percorso: str, comuni: list, risultati: dict, log: list,
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
+def esporta_long(percorso: str, comuni: list, risultati: dict) -> None:
+    """Scrive i risultati in formato LONG/TIDY normalizzato (una riga per
+    osservazione), pronto per pandas/R senza post-processing.
+
+    Colonne: data_elezione, tipo, turno, comune, provincia, ambito
+    (scheda|candidato|lista), nome, voti, pct, eletto, seggi.
+    La riga di livello 'scheda' porta elettori/votanti/affluenza (in voti/pct).
+    """
+    with open(percorso, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.writer(f, delimiter=";")
+        w.writerow(["data_elezione", "tipo", "turno", "comune", "provincia",
+                    "ambito", "nome", "voti", "pct", "eletto", "seggi"])
+        for comune in comuni:
+            for rec in risultati[comune]:
+                base = [rec["data_elezione"], rec.get("tipo", ""),
+                        rec.get("turno", "1° turno"), rec["comune"],
+                        rec["provincia"]]
+                # riga riepilogo schede (elettori/votanti/affluenza)
+                w.writerow(base + ["scheda", "elettori", rec["elettori"],
+                                   "", "", ""])
+                w.writerow(base + ["scheda", "votanti", rec["votanti"],
+                                   rec["affluenza_pct"], "", ""])
+                w.writerow(base + ["scheda", "bianche", rec["bianche"],
+                                   "", "", ""])
+                w.writerow(base + ["scheda", "non_valide",
+                                   rec["non_valide"], "", "", ""])
+                for c in rec["candidati"]:
+                    w.writerow(base + ["candidato", c["candidato"] or "",
+                                       c["voti_candidato"],
+                                       c["pct_candidato"], c["eletto"], ""])
+                    for l in c["liste"]:
+                        w.writerow(base + ["lista", l["lista"], l["voti"],
+                                           l["pct"], "", l["seggi"]])
+
+
+def esporta_xlsx(percorso: str, comuni: list, risultati: dict) -> None:
+    """Scrive i risultati in Excel (.xlsx) — richiede il pacchetto opzionale
+    openpyxl (pip install tallyho[xlsx]). Struttura: un foglio 'risultati'
+    con le stesse righe del CSV più un foglio 'log' per comune.
+    """
+    try:
+        import openpyxl
+    except ImportError:
+        print("[!] Export Excel richiede openpyxl: "
+              "pip install 'tallyho[xlsx]'")
+        return
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "risultati"
+    header = ["data_elezione", "comune", "provincia", "turno", "elettori",
+              "votanti", "affluenza_pct", "bianche", "non_valide",
+              "candidato", "eletto", "voti_candidato", "pct_candidato",
+              "lista", "voti_lista", "pct_lista", "seggi"]
+    ws.append(header)
+    for comune in comuni:
+        for rec in risultati[comune]:
+            base = [rec["data_elezione"], rec["comune"], rec["provincia"],
+                    rec.get("turno", "1° turno"), rec["elettori"],
+                    rec["votanti"], rec["affluenza_pct"], rec["bianche"],
+                    rec["non_valide"]]
+            for c in rec["candidati"]:
+                riga = base + [c["candidato"] or "", c["eletto"],
+                               c["voti_candidato"], c["pct_candidato"]]
+                if c["liste"]:
+                    for l in c["liste"]:
+                        ws.append(riga + [l["lista"], l["voti"], l["pct"],
+                                          l["seggi"]])
+                else:
+                    ws.append(riga + ["", "", "", ""])
+    wb.save(percorso)
+
+
+def esporta_parquet(percorso: str, comuni: list, risultati: dict) -> None:
+    """Scrive i risultati in Parquet — richiede pyarrow
+    (pip install tallyho[parquet]). Stessa struttura del CSV.
+    """
+    try:
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+    except ImportError:
+        print("[!] Export Parquet richiede pyarrow: "
+              "pip install 'tallyho[parquet]'")
+        return
+    righe = []
+    for comune in comuni:
+        for rec in risultati[comune]:
+            base = [rec["data_elezione"], rec["comune"], rec["provincia"],
+                    rec.get("turno", "1° turno"), rec["elettori"],
+                    rec["votanti"], rec["affluenza_pct"], rec["bianche"],
+                    rec["non_valide"]]
+            for c in rec["candidati"]:
+                riga = base + [c["candidato"] or "", c["eletto"],
+                               c["voti_candidato"], c["pct_candidato"]]
+                if c["liste"]:
+                    for l in c["liste"]:
+                        righe.append(riga + [l["lista"], l["voti"], l["pct"],
+                                             l["seggi"]])
+                else:
+                    righe.append(riga + ["", "", "", ""])
+    tabelle = ["data_elezione", "comune", "provincia", "turno", "elettori",
+               "votanti", "affluenza_pct", "bianche", "non_valide",
+               "candidato", "eletto", "voti_candidato", "pct_candidato",
+               "lista", "voti_lista", "pct_lista", "seggi"]
+    if not righe:
+        tabella = pa.table({t: pa.array([], pa.string()) for t in tabelle})
+    else:
+        tabella = pa.table({t: [r[i] for r in righe]
+                            for i, t in enumerate(tabelle)})
+    pq.write_table(tabella, percorso)
+
+
 def scarica_ammcom() -> str:
     """Scarica (con cache) l'anagrafe amministratori DAIT.
 
