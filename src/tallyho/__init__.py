@@ -2,6 +2,7 @@
 
 __version__ = "1.0.0"
 
+from .cache import CachedSession, cache_leggi, cache_scrivi  # noqa: F401
 from .costanti import BASE  # noqa: F401
 from .export import integra_dait  # noqa: F401
 from .navigazione import (  # noqa: F401
@@ -28,6 +29,9 @@ from .parsing import (  # noqa: F401
 
 __all__ = [
     "BASE",
+    "CachedSession",
+    "cache_leggi",
+    "cache_scrivi",
     "decodifica_area",
     "decodifica_opzione",
     "estrai_lista",

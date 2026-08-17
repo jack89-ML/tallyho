@@ -148,13 +148,14 @@ def test_main_applica_config_end_to_end(tmp_path, monkeypatch):
             return None
 
     class _FakeSession:
-        def __init__(self):
+        def __init__(self, ttl=0):
             self.headers = {}
+            self.ttl = ttl
 
         def get(self, url, timeout=30):
             return _FakeResp()
 
-    monkeypatch.setattr(th.requests, "Session", _FakeSession)
+    monkeypatch.setattr(th, "CachedSession", _FakeSession)
     monkeypatch.setattr(th, "leggi_date", lambda html: ["01/01/2020"])
     monkeypatch.setattr(th, "trova_comune", lambda *a, **k: (None, None))
 

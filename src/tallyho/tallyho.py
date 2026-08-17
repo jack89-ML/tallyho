@@ -50,8 +50,7 @@ import sys
 import time
 from datetime import datetime
 
-import requests
-
+from .cache import CachedSession
 from .costanti import BASE, TIPO_ETICHETTE, UA
 from .export import (esporta_csv, esporta_json, esporta_long,
                      esporta_parquet, esporta_xlsx, integra_dait,
@@ -202,6 +201,8 @@ _DEFAULT = {
     "long": False,
     "xlsx": False,
     "parquet": False,
+    "no_cache": False,
+    "cache_ttl": 7 * 24 * 3600,
 }
 
 
@@ -294,6 +295,13 @@ def main():
                          "opzioni, es. comuni, tipo, out, sleep). Gli "
                          "argomenti passati a riga di comando hanno "
                          "precedenza sul file.")
+    ap.add_argument("--no-cache", action="store_true",
+                    default=argparse.SUPPRESS,
+                    help="Disabilita la cache dei form (~/.cache/tallyho/): "
+                         "ogni pagina viene riscaricata dal sito")
+    ap.add_argument("--cache-ttl", type=float, default=argparse.SUPPRESS,
+                    help="Validità di una pagina in cache, in secondi "
+                         "(default 604800 = 7 giorni)")
     args = ap.parse_args()
 
     # ---- config file: i default dal file valgono solo per le opzioni NON
@@ -307,7 +315,7 @@ def main():
     province = tuple(p.strip().upper() for p in args.province.split(",") if p.strip())
     os.makedirs(args.out, exist_ok=True)
 
-    sessione = requests.Session()
+    sessione = CachedSession(ttl=0 if args.no_cache else args.cache_ttl)
     sessione.headers.update({"User-Agent": UA})
 
     # inizializzazione sessione + date
@@ -427,6 +435,8 @@ def main():
     err = sum(1 for x in log if x["esito"] == "ERRORE")
     print(f"[i] totali: OK {len(log) - non_vot - err} | "
           f"non votato {non_vot} | errori {err}")
+    if hasattr(sessione, "statistiche"):
+        print(f"[i] {sessione.statistiche()}")
 
 
 if __name__ == "__main__":
