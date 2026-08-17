@@ -1,8 +1,11 @@
 """Test dell'export CSV/JSON da un dizionario di risultati fittizio."""
 
 import json
+import sys
+import types
 
-from tallyho.export import esporta_csv, esporta_json, esporta_long
+from tallyho.export import (esporta_csv, esporta_json, esporta_long,
+                            esporta_parquet, esporta_xlsx)
 
 RISULTATI = {
     "ROMA": [
@@ -168,3 +171,96 @@ def test_esporta_long_con_referendum(tmp_path):
     assert "scheda;votanti;251;20.62;;" in testo
     assert "quesito;Q1. Test (SI);150;62.5;;" in testo
     assert "quesito;Q1. Test (NO);90;37.5;;" in testo
+
+
+# --------------------------------------------------------------------------
+# Test positivi xlsx/parquet (moduli finti openpyxl/pyarrow, non installati)
+# --------------------------------------------------------------------------
+
+class _FakeWorksheet:
+    def __init__(self):
+        self.title = "risultati"
+        self.righe = []
+
+    def append(self, riga):
+        self.righe.append(riga)
+
+
+class _FakeWorkbook:
+    def __init__(self):
+        self.active = _FakeWorksheet()
+
+    def save(self, percorso):
+        with open(percorso, "w", encoding="utf-8") as f:
+            for riga in self.active.righe:
+                f.write(";".join("" if x is None else str(x) for x in riga))
+                f.write("\n")
+
+
+def _modulo_openpyxl_finto():
+    m = types.ModuleType("openpyxl")
+    m.Workbook = _FakeWorkbook
+    return m
+
+
+class _FakeTable:
+    def __init__(self, data):
+        self.data = data
+
+
+def _modulo_pyarrow_finto():
+    m = types.ModuleType("pyarrow")
+
+    def table(data):
+        return _FakeTable(data)
+
+    def array(lst, tipo=None):
+        return list(lst)
+
+    def string():
+        return "string"
+
+    m.table = table
+    m.array = array
+    m.string = string
+    return m
+
+
+def _modulo_parquet_finto():
+    m = types.ModuleType("pyarrow.parquet")
+
+    def write_table(tabella, percorso):
+        colonne = list(tabella.data.keys())
+        with open(percorso, "w", encoding="utf-8") as f:
+            f.write(";".join(colonne) + "\n")
+            n = len(tabella.data[colonne[0]]) if colonne else 0
+            for i in range(n):
+                f.write(";".join("" if tabella.data[c][i] is None
+                                 else str(tabella.data[c][i])
+                                 for c in colonne) + "\n")
+
+    m.write_table = write_table
+    return m
+
+
+def test_esporta_xlsx_con_referendum(tmp_path, monkeypatch):
+    monkeypatch.setitem(sys.modules, "openpyxl", _modulo_openpyxl_finto())
+    percorso = tmp_path / "elezioni_ref.xlsx"
+    esporta_xlsx(str(percorso), ["AFFILE"], REFERENDUM)
+    assert percorso.exists()
+    testo = percorso.read_text(encoding="utf-8")
+    assert "Q1. Test" in testo
+    assert "SI" in testo
+    assert "NO" in testo
+
+
+def test_esporta_parquet_con_referendum(tmp_path, monkeypatch):
+    monkeypatch.setitem(sys.modules, "pyarrow", _modulo_pyarrow_finto())
+    monkeypatch.setitem(sys.modules, "pyarrow.parquet", _modulo_parquet_finto())
+    percorso = tmp_path / "elezioni_ref.parquet"
+    esporta_parquet(str(percorso), ["AFFILE"], REFERENDUM)
+    assert percorso.exists()
+    testo = percorso.read_text(encoding="utf-8")
+    assert "Q1. Test" in testo
+    assert "SI" in testo
+    assert "NO" in testo

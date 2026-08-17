@@ -321,6 +321,15 @@ def main():
     # inizializzazione sessione + date
     r = sessione.get(f"{BASE}?tpel={args.tipo}", timeout=30)
     r.raise_for_status()
+    # rilevamento cambi del sito: se il select `sel_date` non c'è più, la
+    # struttura del form è cambiata e i NON_VOTATO silenziosi sarebbero
+    # fuorvianti -> fallisci subito e chiaramente invece di estrarre dati
+    # vuoti.
+    if not leggi_select(r.text, "sel_date"):
+        print("[!] Struttura del sito cambiata: select 'sel_date' non trovato "
+              "nella pagina iniziale. TallyHo potrebbe non funzionare più: "
+              "verifica elezionistorico.interno.gov.it")
+        sys.exit(3)
     date = leggi_date(r.text)
     if not date:
         print("Nessuna data trovata — controllo il formato della pagina.")

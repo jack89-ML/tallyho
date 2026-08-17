@@ -156,6 +156,8 @@ def test_main_applica_config_end_to_end(tmp_path, monkeypatch):
             return _FakeResp()
 
     monkeypatch.setattr(th, "CachedSession", _FakeSession)
+    monkeypatch.setattr(th, "leggi_select",
+                        lambda html, nome: [("1", "01/01/2020")])
     monkeypatch.setattr(th, "leggi_date", lambda html: ["01/01/2020"])
     monkeypatch.setattr(th, "trova_comune", lambda *a, **k: (None, None))
 
@@ -168,3 +170,38 @@ def test_main_applica_config_end_to_end(tmp_path, monkeypatch):
     assert len(csv_files) == 1, "il config 'comuni' non ha fatto scrivere il CSV"
     # sleep dal config (0.05) è stato davvero usato, non il default 1.2
     assert sleep_chiamate and all(s == 0.05 for s in sleep_chiamate)
+
+
+def test_main_esce_3_se_struttura_cambiata(tmp_path, monkeypatch, capsys):
+    """Se il select `sel_date` manca dalla pagina iniziale, main() stampa il
+    messaggio diagnostico ed esce con codice 3 (struttura del sito cambiata),
+    invece di produrre NON_VOTATO silenziosi."""
+    import tallyho.tallyho as th
+
+    monkeypatch.chdir(tmp_path)
+
+    class _FakeResp:
+        text = "<html>pagina senza sel_date</html>"
+
+        def raise_for_status(self):
+            return None
+
+    class _FakeSession:
+        def __init__(self, ttl=0):
+            self.headers = {}
+            self.ttl = ttl
+
+        def get(self, url, timeout=30):
+            return _FakeResp()
+
+    monkeypatch.setattr(th, "CachedSession", _FakeSession)
+    # sel_date assente -> struttura cambiata
+    monkeypatch.setattr(th, "leggi_select", lambda html, nome: [])
+
+    monkeypatch.setattr(sys, "argv", ["tallyho", "--comuni", "ROMA"])
+    with pytest.raises(SystemExit) as exc:
+        th.main()
+    assert exc.value.code == 3
+    out = capsys.readouterr().out
+    assert "Struttura del sito cambiata" in out
+    assert "sel_date" in out

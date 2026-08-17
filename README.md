@@ -91,9 +91,9 @@ cinquant'anni di elezioni un giorno alla volta.
 
    ROBUSTEZZA
    ●── Cache dei form in SQLite (~/.cache/tallyho)     [P2]
-   ○── Retry con backoff (2/4/8 s)                     [P2]
+   ●── Retry con backoff (2/4/8 s)                     [P2]
    ◐── Catena condivisa tra comuni (~3x meno richieste) [P2]
-   ○── Tolleranza ai cambi del sito (snapshot selettori) [P3]
+   ●── Rilevamento cambi del sito (exit 3 se `sel_date` manca) [P3]
    ○── CI attivo (GitHub Actions) — serve refresh token [P1]
 
    TERRITORIO E ANALYTICS
@@ -163,7 +163,7 @@ vedi [ROADMAP.md](ROADMAP.md).
 ### Qualità e test
 - **Architettura modulare**: `costanti` / `navigazione` / `parsing` /
   `export` / `cache` / `tallyho` (CLI). API pubblica in `__init__.py`.
-- **68 test** (offline, senza rete) + test di integrazione opzionale
+- **83 test** (offline, senza rete) + test di integrazione opzionale
   (`-m integration`) contro il sito reale; fixture HTML reali in
   `tests/fixtures/`.
 - **README EN** in programma per i contributori internazionali.
@@ -365,6 +365,22 @@ data_elezione;comune;provincia;elettori;votanti;affluenza_pct;bianche;non_valide
 Nelle elezioni storiche (amministratori eletti dal consiglio) la colonna
 `candidato` è vuota e restano le liste; nelle **regionali** il dato è a
 livello regione (replicato per ogni comune richiesto).
+
+### Referendum (CSV)
+
+Per i referendum (`--tipo F`) il CSV contiene **una riga per quesito per
+ciascuna opzione SI e NO**:
+
+- `candidato` = titolo del quesito (es. "Q1. Test");
+- `lista` = `SI` oppure `NO`;
+- `voti_lista` / `pct_lista` = voti e percentuale dell'opzione, ripetuti
+  anche in `voti_candidato` / `pct_candidato`;
+- le colonne base (`elettori`, `votanti`, `affluenza_pct`, `bianche`,
+  `non_valide`) riportano i valori del quesito;
+- `eletto` e `seggi` restano vuoti.
+
+Il campo `valide` (schede valide del quesito) **resta solo nel JSON**: non
+compare nel CSV.
 
 ### JSON
 

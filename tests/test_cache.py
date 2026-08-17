@@ -4,6 +4,7 @@ import os
 import time
 
 import pytest
+import requests
 
 from tallyho.cache import CachedSession, _percorso_db, cache_leggi, cache_scrivi
 
@@ -95,3 +96,91 @@ def test_cached_session_ttl_zero_sempre_rete(monkeypatch):
 def test_statistiche():
     sessione = CachedSession(ttl=0)
     assert "nessuna richiesta" in sessione.statistiche()
+
+
+# --------------------------------------------------------------------------
+# Retry con backoff esponenziale (errori transitori, niente 4xx)
+# --------------------------------------------------------------------------
+
+class _RispostaErrore:
+    """Risposta finta che solleva un vero HTTPError su raise_for_status()."""
+
+    def __init__(self, status, testo="<html>x</html>"):
+        self.status_code = status
+        self.text = testo
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(
+                f"{self.status_code} error", response=self)
+
+
+def test_retry_500_poi_200(monkeypatch):
+    """Un 5xx transitorio viene ritentato: il secondo tentativo va a buon
+    fine e il contatore dei retry è 1."""
+    stati = iter([500, 200])
+    chiamate = []
+
+    def finto_get(self, url, **kwargs):
+        chiamate.append(url)
+        return _RispostaErrore(next(stati))
+
+    monkeypatch.setattr("requests.Session.get", finto_get)
+    sessione = CachedSession(ttl=0, retry_backoff=0)  # attesa nulla nei test
+    risposta = sessione.get("http://esempio.it/x")
+    assert risposta.status_code == 200
+    assert len(chiamate) == 2
+    assert sessione._retry == 1
+
+
+def test_retry_esaurisce_i_tentativi(monkeypatch):
+    """Tre errori consecutivi -> solleva dopo max_retries tentativi extra."""
+    chiamate = []
+
+    def finto_get(self, url, **kwargs):
+        chiamate.append(url)
+        return _RispostaErrore(500)
+
+    monkeypatch.setattr("requests.Session.get", finto_get)
+    sessione = CachedSession(ttl=0, max_retries=3, retry_backoff=0)
+    with pytest.raises(requests.exceptions.HTTPError):
+        sessione.get("http://esempio.it/x")
+    # 1 tentativo iniziale + 3 retry = 4 chiamate totali
+    assert len(chiamate) == 4
+    assert sessione._retry == 3
+
+
+def test_retry_nessun_retry_su_4xx(monkeypatch):
+    """Gli errori 4xx sono permanenti: nessun retry, solleva subito."""
+    chiamate = []
+
+    def finto_get(self, url, **kwargs):
+        chiamate.append(url)
+        return _RispostaErrore(404)
+
+    monkeypatch.setattr("requests.Session.get", finto_get)
+    sessione = CachedSession(ttl=0, retry_backoff=0)
+    with pytest.raises(requests.exceptions.HTTPError):
+        sessione.get("http://esempio.it/x")
+    assert len(chiamate) == 1
+    assert sessione._retry == 0
+
+
+def test_retry_su_connection_error(monkeypatch):
+    """Anche ConnectionError (rete giù) viene ritentato."""
+    tentativi = [requests.exceptions.ConnectionError("boom"),
+                 requests.exceptions.ConnectionError("boom")]
+    chiamate = []
+
+    def finto_get(self, url, **kwargs):
+        chiamate.append(url)
+        if tentativi:
+            raise tentativi.pop(0)
+        return _RispostaErrore(200)
+
+    monkeypatch.setattr("requests.Session.get", finto_get)
+    sessione = CachedSession(ttl=0, retry_backoff=0)
+    risposta = sessione.get("http://esempio.it/x")
+    assert risposta.status_code == 200
+    assert len(chiamate) == 3
+    assert sessione._retry == 2
