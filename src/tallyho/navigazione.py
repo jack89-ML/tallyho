@@ -103,15 +103,19 @@ def scendi_livello(sessione, page_path: str, page_var: str, valore: str) -> str:
 def trova_comune(sessione, data, comune_target, tipo, regione_value,
                  nome_regione, province_target):
     """
-    Percorre data -> area -> regione -> [provincia] -> [comune] in modo
-    dinamico, adattandosi al tipo di elezione:
-      - comunali/regionali: area Italia -> regione (-> provincia -> comune)
+    Percorre data -> area -> ... -> comune in modo dinamico, adattandosi alla
+    gerarchia del tipo di elezione:
+      - comunali/regionali: area Italia -> regione -> (provincia ->) comune
       - politiche (C/S): area Italia -> circoscrizione (testo == nome
         regione) -> provincia -> comune
-      - regionali: la discesa si ferma alla regione (niente provincia)
+      - europee (E): area -> circoscrizione -> regione -> provincia -> comune
+      - provinciali (P): area -> regione -> provincia -> collegio -> comune
+    La discesa è dinamica: legge i `sel_sezioneN` disponibili nella pagina
+    (fino a 5 livelli) invece di assumere una gerarchia fissa.
     Ritorna (html_risultati, contesto) se l'area ha votato, altrimenti
     (None, None).
     """
+    comune_target = comune_target.upper()
     # passo 1: seleziona la data
     url = f"{BASE}?tpel={tipo}&dtel={data}"
     r = sessione.get(url, timeout=30)
@@ -143,42 +147,53 @@ def trova_comune(sessione, data, comune_target, tipo, regione_value,
     contesto = {"data": data, "regione": scelta_reg[1], "provincia": "",
                 "comune": comune_target}
 
-    # passo 4: livello 3 (provincia per comunali/regionali, collegi
-    # plurinominali per le politiche post-2017, ripartizioni NORD/CENTRO/SUD
-    # per le regionali). Se la pagina ha GIÀ i risultati (es. regionali),
-    # non scendere oltre.
+    # passo 4+: discesa dinamica fino al comune (sel_sezione3 .. sel_sezione5)
+    return _scendi_fino_a_comune(sessione, html_p, 3, comune_target,
+                                 province_target, contesto)
+
+
+def _scendi_fino_a_comune(sessione, html_p, livello, comune_target,
+                          province_target, contesto):
+    """Scende i livelli sel_sezione{livello}..5 fino al comune target.
+
+    A ogni livello: se la pagina ha già i risultati si ferma; altrimenti
+    legge il select successivo e sceglie il comune (se presente) o le
+    province note (o tutte le opzioni come fallback per gerarchie diverse).
+    Ritorna (html_risultati, contesto) oppure (None, contesto).
+    """
     if pagina_ha_risultati(html_p):
         return html_p, contesto
-    province = leggi_select(html_p, "sel_sezione3")
-    if province:
-        scelte_prov = [(v, t) for v, t in province
-                       if t.upper() in province_target]
-        if not scelte_prov:
-            # gerarchia diversa (es. collegi plurinominali "LAZIO - P01"):
-            # prova tutte le opzioni finché il comune compare al livello 4
-            scelte_prov = province
-        pp_prov, pv_prov = leggi_onchange(html_p, "sel_sezione3")
-        for v_prov, t_prov in scelte_prov:
-            html_prov = scendi_livello(sessione, pp_prov, pv_prov, v_prov)
-            # passo 5: comune (livello 4) — se non c'è, prova la provincia dopo
-            comuni = leggi_select(html_prov, "sel_sezione4")
-            if comuni:
-                scelta_com = None
-                for cv, cn in comuni:
-                    if cn.upper() == comune_target.upper():
-                        scelta_com = (cv, cn)
-                        break
-                if scelta_com is None:
-                    continue  # comune non in questa provincia
-                contesto["provincia"] = t_prov
-                pp_com, pv_com = leggi_onchange(html_prov, "sel_sezione4")
-                html_p = scendi_livello(sessione, pp_com, pv_com, scelta_com[0])
-                return html_p, contesto
-            # senza livello comune (es. provinciali per provincia)
-            contesto["provincia"] = t_prov
-            return html_prov, contesto
-        return None, None
-    return html_p, contesto
+    sel_nome = f"sel_sezione{livello}"
+    opzioni = leggi_select(html_p, sel_nome)
+    if not opzioni:
+        return (html_p, contesto) if pagina_ha_risultati(html_p) else (None, None)
+    pp, pv = leggi_onchange(html_p, sel_nome)
+
+    # 1) livello comune: opzione con testo == comune target
+    for v, t in opzioni:
+        if t.upper() == comune_target:
+            html_giu = scendi_livello(sessione, pp, pv, v)
+            contesto["comune"] = t
+            if pagina_ha_risultati(html_giu):
+                return html_giu, contesto
+            return _scendi_fino_a_comune(sessione, html_giu, livello + 1,
+                                         comune_target, province_target,
+                                         contesto)
+
+    # 2) livello provincia o intermedio: province note, altrimenti tutte le
+    #    opzioni (gerarchie diverse: collegi plurinominali, ripartizioni...)
+    province = [(v, t) for v, t in opzioni if t.upper() in province_target]
+    candidate = province or opzioni
+    for v, t in candidate:
+        html_giu = scendi_livello(sessione, pp, pv, v)
+        ctx = dict(contesto)
+        if province:
+            ctx["provincia"] = t
+        res = _scendi_fino_a_comune(sessione, html_giu, livello + 1,
+                                    comune_target, province_target, ctx)
+        if res[0] is not None:
+            return res
+    return None, None
 
 
 def pagina_ha_risultati(html_page: str) -> bool:

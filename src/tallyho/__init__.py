@@ -19,8 +19,10 @@ from .parsing import (  # noqa: F401
     estrai_tabelle,
     parse_affluenza,
     parse_candidati,
+    parse_referendum,
     parse_risultati,
     parse_schede,
+    rileva_turno,
 )
 
 __all__ = [
@@ -36,8 +38,10 @@ __all__ = [
     "pagina_ha_risultati",
     "parse_affluenza",
     "parse_candidati",
+    "parse_referendum",
     "parse_risultati",
     "parse_schede",
+    "rileva_turno",
     "scendi_livello",
     "trova_comune",
 ]

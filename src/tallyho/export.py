@@ -18,31 +18,26 @@ def esporta_csv(percorso: str, comuni: list, risultati: dict) -> None:
     """
     with open(percorso, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f, delimiter=";")
-        w.writerow(["data_elezione", "comune", "provincia", "elettori",
-                    "votanti", "affluenza_pct", "bianche", "non_valide",
-                    "candidato", "eletto", "voti_candidato", "pct_candidato",
-                    "lista", "voti_lista", "pct_lista", "seggi"])
+        w.writerow(["data_elezione", "comune", "provincia", "turno",
+                    "elettori", "votanti", "affluenza_pct", "bianche",
+                    "non_valide", "candidato", "eletto", "voti_candidato",
+                    "pct_candidato", "lista", "voti_lista", "pct_lista",
+                    "seggi"])
         for comune in comuni:
             for rec in risultati[comune]:
+                base = [rec["data_elezione"], rec["comune"], rec["provincia"],
+                        rec.get("turno", "1° turno"), rec["elettori"],
+                        rec["votanti"], rec["affluenza_pct"], rec["bianche"],
+                        rec["non_valide"]]
                 for c in rec["candidati"]:
+                    riga = base + [c["candidato"] or "", c["eletto"],
+                                   c["voti_candidato"], c["pct_candidato"]]
                     if c["liste"]:
                         for l in c["liste"]:
-                            w.writerow([rec["data_elezione"], rec["comune"],
-                                        rec["provincia"], rec["elettori"],
-                                        rec["votanti"], rec["affluenza_pct"],
-                                        rec["bianche"], rec["non_valide"],
-                                        c["candidato"] or "", c["eletto"],
-                                        c["voti_candidato"], c["pct_candidato"],
-                                        l["lista"], l["voti"], l["pct"],
-                                        l["seggi"]])
+                            w.writerow(riga + [l["lista"], l["voti"],
+                                               l["pct"], l["seggi"]])
                     else:
-                        w.writerow([rec["data_elezione"], rec["comune"],
-                                    rec["provincia"], rec["elettori"],
-                                    rec["votanti"], rec["affluenza_pct"],
-                                    rec["bianche"], rec["non_valide"],
-                                    c["candidato"] or "", c["eletto"],
-                                    c["voti_candidato"], c["pct_candidato"],
-                                    "", "", "", ""])
+                        w.writerow(riga + ["", "", "", ""])
 
 
 def esporta_json(percorso: str, comuni: list, risultati: dict, log: list,

@@ -48,6 +48,25 @@ def _to_int(cella: str):
         return None
 
 
+def _parse_perc(cella: str):
+    """Percentuale '62,50' o '62,50%' -> float; None se non numerica."""
+    m = re.search(r"([\d,]+)\s*%?", cella)
+    if not m:
+        return None
+    try:
+        return float(m.group(1).replace(",", "."))
+    except ValueError:
+        return None
+
+
+def rileva_turno(html_page: str) -> str:
+    """'ballottaggio' se negli header compare 'II turno' (case-insensitive),
+    altrimenti '1° turno'."""
+    if re.search(r"ii\s+turno", html_page, re.I):
+        return "ballottaggio"
+    return "1° turno"
+
+
 def parse_affluenza(tabelle: list) -> dict:
     """Elettori, votanti, percentuale dalla tabella di riepilogo."""
     out: dict = {"elettori": None, "votanti": None, "affluenza_pct": None}
@@ -65,6 +84,9 @@ def parse_affluenza(tabelle: list) -> dict:
                         if m:
                             out["affluenza_pct"] = float(
                                 m.group(1).replace(",", "."))
+    if (out["affluenza_pct"] is None and out["elettori"] is not None
+            and out["elettori"] > 0 and out["votanti"] is not None):
+        out["affluenza_pct"] = round(out["votanti"] / out["elettori"] * 100, 2)
     return out
 
 
@@ -77,9 +99,9 @@ def parse_schede(tabelle: list) -> dict:
                 if len(riga) >= 2:
                     k = riga[0].lower()
                     if k.startswith("bianche"):
-                        out["bianche"] = int(riga[1].replace(".", ""))
+                        out["bianche"] = _to_int(riga[1])
                     elif k.startswith("non valide"):
-                        out["non_valide"] = int(riga[1].replace(".", ""))
+                        out["non_valide"] = _to_int(riga[1])
     return out
 
 
@@ -142,17 +164,107 @@ def parse_candidati(tabelle: list) -> list:
     return risultati
 
 
+# --------------------------------------------------------------------------
+# Referendum (un quesito per blocco: titolo + tabelle SI/NO)
+# --------------------------------------------------------------------------
+
+def _parse_quesito(titolo: str, tabelle: list) -> dict:
+    """Estrae i dati di un singolo quesito referendario dalle sue tabelle."""
+    q = {"quesito": titolo, "elettori": None, "votanti": None,
+         "affluenza_pct": None, "valide": None, "bianche": None,
+         "non_valide": None,
+         "si": {"voti": None, "pct": None}, "no": {"voti": None, "pct": None}}
+    for tab in tabelle:
+        if not tab or not tab[0]:
+            continue
+        header = " ".join(tab[0]).lower()
+        if header.startswith("elettori"):
+            # tabella di riepilogo: riga "Elettori" -> valore
+            for riga in tab:
+                if (riga and riga[0].lower().startswith("elettori")
+                        and len(riga) > 1):
+                    q["elettori"] = _to_int(riga[1])
+                    break
+        elif "affluenza" in header:
+            for riga in tab[1:]:
+                if len(riga) >= 2:
+                    k = riga[0].lower()
+                    if k.startswith("votanti"):
+                        q["votanti"] = _to_int(riga[1])
+                    elif k.startswith("%"):
+                        q["affluenza_pct"] = _parse_perc(riga[1])
+        elif "schede" in header:
+            for riga in tab[1:]:
+                if len(riga) >= 2:
+                    k = riga[0].lower()
+                    if k.startswith("valide"):
+                        q["valide"] = _to_int(riga[1])
+                    elif "non valide" in k:
+                        q["non_valide"] = _to_int(riga[1])
+                    elif "bianche" in k:
+                        q["bianche"] = _to_int(riga[1])
+        elif header.startswith("si") and "no" in header:
+            # riga voti poi riga percentuali (con % o virgola)
+            for riga in tab[1:]:
+                if len(riga) < 2:
+                    continue
+                if "%" in riga[0] or "," in riga[0]:
+                    q["si"]["pct"] = _parse_perc(riga[0])
+                    q["no"]["pct"] = _parse_perc(riga[1])
+                else:
+                    q["si"]["voti"] = _to_int(riga[0])
+                    q["no"]["voti"] = _to_int(riga[1])
+    if (q["affluenza_pct"] is None and q["elettori"] is not None
+            and q["elettori"] > 0 and q["votanti"] is not None):
+        q["affluenza_pct"] = round(q["votanti"] / q["elettori"] * 100, 2)
+    return q
+
+
+def parse_referendum(html_page: str) -> dict:
+    """Parsing specifico dei referendum: una sezione per quesito.
+
+    Ritorna {'quesiti': [ {quesito, elettori, votanti, affluenza_pct,
+    valide, bianche, non_valide, si{voti,pct}, no{voti,pct}}, ... ]}.
+    """
+    match_titoli = list(re.finditer(
+        r'<div[^>]*class="[^"]*dati_referendum_titolo_quesito[^"]*"[^>]*>'
+        r"(.*?)</div>", html_page, re.S))
+    quesiti = []
+    for i, m in enumerate(match_titoli):
+        titolo = pulisci(m.group(1))
+        inizio_blocco = m.end()
+        fine_blocco = (match_titoli[i + 1].start()
+                       if i + 1 < len(match_titoli) else len(html_page))
+        quesiti.append(_parse_quesito(titolo, estrai_tabelle(
+            html_page[inizio_blocco:fine_blocco])))
+    return {"quesiti": quesiti}
+
+
 def parse_risultati(html_page: str) -> dict:
     """Tutte le informazioni estraibili dalla pagina dei risultati."""
+    h3 = re.search(r"<h3[^>]*>(.*?)</h3>", html_page, re.S)
+    intestazione = re.sub(r"<[^>]+>", " ", h3.group(1)) if h3 else ""
+    intestazione = re.sub(r"\s+", " ", intestazione).strip()
+    turno = rileva_turno(html_page)
+
+    # referendum: struttura a quesiti (SI/NO), niente candidati/liste
+    if "dati_referendum_titolo_quesito" in html_page:
+        return {
+            "intestazione": intestazione,
+            "turno": turno,
+            "quesiti": parse_referendum(html_page)["quesiti"],
+            "elettori": None, "votanti": None, "affluenza_pct": None,
+            "bianche": None, "non_valide": None,
+            "candidati": [],
+        }
+
     tabelle = estrai_tabelle(html_page)
     aff = parse_affluenza(tabelle)
     sch = parse_schede(tabelle)
     cand = parse_candidati(tabelle)
-    h3 = re.search(r"<h3[^>]*>(.*?)</h3>", html_page, re.S)
-    intestazione = re.sub(r"<[^>]+>", " ", h3.group(1)) if h3 else ""
-    intestazione = re.sub(r"\s+", " ", intestazione).strip()
     return {
         "intestazione": intestazione,
+        "turno": turno,
         **aff, **sch,
         "candidati": cand,
     }

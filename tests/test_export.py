@@ -10,6 +10,7 @@ RISULTATI = {
             "data_elezione": "03/10/2021",
             "comune": "ROMA",
             "provincia": "ROMA",
+            "turno": "ballottaggio",
             "elettori": 2359248,
             "votanti": 1145268,
             "affluenza_pct": 48.54,
@@ -49,13 +50,16 @@ def test_esporta_csv(tmp_path):
     header = righe[0].split(";")
     assert header[0] == "data_elezione"
     assert header[-1] == "seggi"
-    assert len(header) == 16
+    assert len(header) == 17
+    assert header[3] == "turno"
     # una riga per ogni lista + una riga per il candidato senza lista
     assert len(righe) == 3
     assert "PARTITO DEMOCRATICO" in testo
     assert "PARTITO DEMOCRATICO;166194;16.38;18" in testo  # lista + voti/%/seggi
     # il candidato senza liste finisce con 4 campi vuoti
     assert "MICHELLI ENRICO;False;299594;26.99;;;;" in testo
+    # il campo turno (ballottaggio) è valorizzato nella prima riga
+    assert "ROMA;ROMA;ballottaggio;2359248" in testo
 
 
 def test_esporta_json(tmp_path):
@@ -76,6 +80,7 @@ def test_esporta_json(tmp_path):
     assert payload["log"][0]["esito"] == "OK"
     lista = payload["risultati"]["ROMA"][0]["candidati"][0]["liste"][0]
     assert lista["lista"] == "PARTITO DEMOCRATICO"
+    assert payload["risultati"]["ROMA"][0]["turno"] == "ballottaggio"
     assert payload["amministratori_dait"]["ROMA"][0]["carica"] == "Sindaco"
 
 
