@@ -92,6 +92,17 @@ tallyho --elenca comuni --data 14/05/2023 --nome-regione TOSCANA --province FIRE
 tallyho --comuni ROMA --data 03/10/2021 --long --xlsx
 ```
 
+### Cache (per non stressare il sito)
+
+Le pagine del form vengono salvate in `~/.cache/tallyho/` e riusate per
+7 giorni: la seconda volta che estrai gli stessi dati, non scarichi nulla
+di nuovo. Per forzare il download:
+
+```bash
+tallyho --comuni ROMA --no-cache          # ignora la cache
+tallyho --comuni ROMA --cache-ttl 3600    # cache valida 1 ora
+```
+
 ---
 
 ## 5. Anagrafe degli amministratori (--dait)

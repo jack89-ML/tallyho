@@ -3,6 +3,8 @@
 Priorità: **P1** (alto impatto / costo basso) · **P2** (medio) · **P3** (basso
 impatto o dipende da fattori esterni).
 
+Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
+
 ## P1 — Migliorie rapide
 
 - [x] **affluenza_pct nel CSV**: il campo usciva vuoto (es. riga Roma 2021).
@@ -21,18 +23,18 @@ impatto o dipende da fattori esterni).
 
 ## P2 — Ottimizzazioni
 
-- [ ] **Catena condivisa tra comuni**: oggi per ogni comune si rifà la
+- [~] **Catena condivisa tra comuni**: oggi per ogni comune si rifà la
       sequenza data → area → regione (identica per tutti). Ristrutturare
       `trova_comune` per eseguire una sola volta la parte comune per data e
       scendere poi per provincia/comune: ~3x meno richieste con 3 comuni,
-      molto di più con liste lunghe.
+      molto di più con liste lunghe. *(programmato: cronjob 01/09)*
 - [ ] **Retry con backoff**: su errori di rete/HTTP 5xx, riprovare con
       attesa esponenziale (es. 2, 4, 8 s) prima di segnare `ERRORE` — il
       sito è un archivio ministeriale con picchi di traffico.
-- [ ] **Cache dei form decodificati**: salvare le `option` decodificate per
-      (tipo, data, livello) in `~/.cache/tallyho/` per evitare di riscaricare
-      le stesse pagine a ogni run (utile per dataset grandi e per tollerare
-      eventuali modifiche temporanee del sito).
+- [x] **Cache dei form decodificati**: fatta — `CachedSession` con SQLite
+      in `~/.cache/tallyho/cache.db` (commit e185305), opzioni `--no-cache`
+      e `--cache-ttl`. Verificata dal vivo: 0% → 100% di richieste servite
+      da cache al secondo run.
 
 ## P3 — Robustezza e documentazione
 
@@ -42,16 +44,44 @@ impatto o dipende da fattori esterni).
       un generico "non votato". Idea: uno snapshot di riferimento dei
       selettori da confrontare a ogni run.
 - [ ] **README in inglese**: sezione "Contributing" / README EN per i
-      contributori internazionali (il progetto è già pubblicato e
-      condiviso su r/osinttools).
+      contributori internazionali.
 - [ ] **Politiche per comune**: il sito pubblica il voto per collegio, non
       per comune (limite della fonte). Valutare se aggregare i dati per
       comune via open data DAIT (scrutini per sezione, se pubblicati) —
       solo come ricerca, senza promettere funzionalità.
-- [ ] **Archiviazione Zenodo + DOI**: collegare il repo a Zenodo (servizio
-      CERN, gratuito): a ogni release GitHub, Zenodo archivia una snapshot
-      e assegna un DOI stabile da citare nelle pubblicazioni. Il file
-      `.zenodo.json` con i metadati è già pronto nella radice; manca il
-      collegamento account (azione manuale su zenodo.org) e la prima
-      release. Dopo: inserire il DOI in `CITATION.cff` e nel README.
+- [x] **Archiviazione Zenodo + DOI**: fatto — repo collegato a Zenodo,
+      release v1.0.0 archiviata, DOI 10.5281/zenodo.21979207 in
+      `CITATION.cff` e README (commits 8e3845c, f033021).
 
+## P4 — Dataset builder e scala territoriale
+
+- [ ] **Dataset builder `--provincia X` / `--tutti-comuni`**: estrazione
+      bulk di tutti i comuni di una provincia/regione. È il salto da "un
+      comune" a "un territorio". Prerequisito: catena condivisa (P2) per
+      non fare decine di migliaia di richieste.
+- [ ] **Aggregazione serie storiche provincia/regione** (`tallyho-aggrega`):
+      somma voti e affluenza aggregata per livello territoriale. Elaborazione
+      locale, nessun rischio.
+
+## P5 — Analytics e integrazioni dati
+
+- [ ] **Delta/swing tra elezioni consecutive**: variazione % per lista,
+      indice di volatilità elettorale di Pedersen. Punto delicato: matching
+      dei nomi partito tra date storiche.
+- [ ] **Join ISTAT popolazione**: dataset popolazione per comune per
+      affluenza normalizzata e analisi demografiche del voto (fonte esterna).
+- [ ] **Clustering comuni per comportamento di voto** (scikit-learn):
+      utile per segmentazione territoriale; dipende dall'aggregazione.
+- [ ] **Export GIS (GeoJSON/Shapefile)**: mappe del voto con geometrie
+      ISTAT; alto valore per il data journalism, ultimo per complessità.
+
+## P6 — Agenti e distribuzione
+
+- [ ] **Report Markdown per comune**: sintesi leggibile (affluenza, sindaci
+      succedutisi, serie) pronta per knowledge base e agenti LLM.
+- [ ] **API locale FastAPI**: servire i dataset estratti su HTTP.
+- [ ] **Pubblicazione PyPI** (`pip install tallyho`): packaging già pronto,
+      serve account PyPI e workflow di release.
+- [ ] **Grafici serie storiche** (matplotlib/altair): affluenza e voti nel
+      tempo.
+- [ ] **CLI completions** (argcomplete): completamento tab per le shell.

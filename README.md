@@ -67,6 +67,107 @@ cinquant'anni di elezioni un giorno alla volta.
 > **Nuovi qui?** C'è un [cheatsheet](CHEATSHEET.md) con i comandi
 > essenziali spiegati passo passo.
 
+## Roadmap (stato)
+
+```
+                                TALLYHO — STATO IMPLEMENTAZIONI
+   ● = fatto   ◐ = in corso   ○ = da fare
+
+   CORE
+   ●── Estrazione serie storica per comune (tutte le date)
+   ●── Tipi di elezione: G R P C S E F A (comunali→costituente)
+   ●── Parser referendum (SI/NO, per quesito)
+   ●── Parsing regionali (candidati presidenti + liste collegate)
+   ●── Flag turno (1° turno / ballottaggio)
+   ●── Gerarchia dinamica fino a 5 livelli (europee, provinciali)
+   ●── Province storiche (pre-1992)
+   ●── Affluenza fallback (votanti/elettori*100)
+   ●── Gestione errori: OK / NON_VOTATO / ERRORE + pausa uniforme
+
+   EXPORT
+   ●── CSV (UTF-8 BOM, ;) · JSON · --long (tidy pandas/R)
+   ●── --xlsx (openpyxl) · --parquet (pyarrow)
+   ◐── Report Markdown per comune (agenti LLM / KB)   [P6]
+
+   ROBUSTEZZA
+   ●── Cache dei form in SQLite (~/.cache/tallyho)     [P2]
+   ○── Retry con backoff (2/4/8 s)                     [P2]
+   ◐── Catena condivisa tra comuni (~3x meno richieste) [P2]
+   ○── Tolleranza ai cambi del sito (snapshot selettori) [P3]
+   ○── CI attivo (GitHub Actions) — serve refresh token [P1]
+
+   TERRITORIO E ANALYTICS
+   ○── Dataset builder --provincia / --tutti-comuni    [P4]
+   ○── Aggregazione provincia/regione (tallyho-aggrega) [P4]
+   ○── Swing + volatilità Pedersen                     [P5]
+   ○── Join ISTAT popolazione (affluenza normalizzata) [P5]
+   ○── Clustering comuni · GIS GeoJSON · grafici       [P5]
+
+   DISTRIBUZIONE
+   ●── Zenodo + DOI 10.5281/zenodo.21979207 (v1.0.0)   [P3]
+   ○── PyPI (pip install tallyho)                      [P6]
+   ○── API locale FastAPI                              [P6]
+   ○── README EN + Contributing                        [P3]
+```
+
+Dettaglio delle singole voci (priorità, stato, note operative):
+vedi [ROADMAP.md](ROADMAP.md).
+
+## Implementazioni in dettaglio
+
+### Estrazione
+- **Serie storica completa**: tutte le date disponibili per comune, dal
+  1970 (comunali) o 1946 (altri tipi) a oggi, in un solo comando.
+- **Tipi di elezione**: comunali (G), regionali (R), provinciali (P),
+  politiche Camera/Senato (C/S), europee (E), referendum (F), costituente
+  (A).
+- **Referendum**: per ogni quesito vengono estratti titolo, elettori,
+  votanti e %, valide/bianche/non valide, voti SI e NO con percentuali.
+- **Regionali**: candidati presidenti (righe `leader`) e liste collegate,
+  con esito eletto, voti, % e seggi; i totali di coalizione e le righe
+  "LISTE CIRCOSCRIZIONALI" del TOTALE vengono ignorati.
+- **Gerarchia dinamica**: la discesa si adatta al numero reale di livelli
+  della pagina (fino a 5: circoscrizione → regione → provincia → collegio →
+  comune), quindi europee e provinciali funzionano come comunali.
+- **Province storiche**: i comuni di province istituite dopo il 1992
+  risultano nella provincia originaria per le elezioni precedenti
+  (es. `--province LECCO,COMO`).
+- **Turno**: ogni consultazione è marcata `1° turno` o `ballottaggio`,
+  rilevato dagli header delle tabelle del sito ("II turno").
+
+### Export
+- **CSV**: delimitatore `;`, BOM UTF-8 (apre correttamente in Excel),
+  una riga per lista/candidato.
+- **JSON**: struttura annidata con log di navigazione
+  (OK / NON_VOTATO / ERRORE per ogni data).
+- **`--long`**: CSV tidy con una riga per osservazione (livelli
+  scheda/candidato/lista) pronto per pandas e R senza post-processing.
+- **`--xlsx`** e **`--parquet`**: richiedono i pacchetti opzionali
+  (`pip install "tallyho[xlsx]"` / `"tallyho[parquet]"`).
+- **`--dait`**: integra l'anagrafe amministratori DAIT (sindaci,
+  commissari, assessori in carica con date e lista) nel JSON.
+
+### Configurazione
+- **`--config file.toml`** (o `.yaml`): default riusabili per tutte le
+  opzioni; la riga di comando ha sempre la precedenza.
+- **`--no-cache`** / **`--cache-ttl`**: controllo della cache dei form.
+
+### Cache e rispetto del server
+- **Cache SQLite** (`~/.cache/tallyho/cache.db`): le pagine del form
+  scaricate vengono riusate per 7 giorni (default), con un risparmio
+  enorme su dataset grandi. Statistiche a fine run
+  (`cache: N/N richieste servite da cache`).
+- **Pausa configurabile** (`--sleep`, default 1.2 s) applicata tra le
+  date e sui rami di errore/NON_VOTATO: nessun burst di richieste.
+
+### Qualità e test
+- **Architettura modulare**: `costanti` / `navigazione` / `parsing` /
+  `export` / `cache` / `tallyho` (CLI). API pubblica in `__init__.py`.
+- **68 test** (offline, senza rete) + test di integrazione opzionale
+  (`-m integration`) contro il sito reale; fixture HTML reali in
+  `tests/fixtures/`.
+- **README EN** in programma per i contributori internazionali.
+
 ## Installazione
 
 ```bash
