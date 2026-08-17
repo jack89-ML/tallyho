@@ -11,11 +11,11 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
       Risolto: fallback `votanti / elettori * 100` quando il sito non
       espone la percentuale (commit 5b56365, 83000e3). Verificato dal vivo
       su Roma 12/02/2023 (37.2%).
-- [~] **CI attivo**: workflow versionato e pushato in
+- [x] **CI attivo**: fatto — workflow versionato e pushato in
       `.github/workflows/ci.yml` (matrix Python 3.9-3.12,
       `pytest -m "not integration"` + `ruff check`); scope `workflow`
-      autorizzato sul token (17/08) e push del workflow riuscito. Resta da
-      confermare il primo run CI verde nella tab Actions di GitHub.
+      autorizzato sul token (17/08). Primi run CI verdi confermati nella
+      tab Actions (17/08).
 - [x] **Test di integrazione** (rete, opzionali): fatto — `tests/test_integrazione.py`
       marcato `@pytest.mark.integration`, escluso dal default con
       `addopts="-m 'not integration'"` (commit 83000e3). Esteso a 5 tipi di

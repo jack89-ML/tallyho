@@ -96,7 +96,7 @@ cinquant'anni di elezioni un giorno alla volta.
    ●── Retry con backoff (2/4/8 s)                     [P2]
    ◐── Catena condivisa tra comuni (~3x meno richieste) [P2]
    ●── Rilevamento cambi del sito (exit 3 se `sel_date` manca) [P3]
-   ◐── CI attivo (GitHub Actions) — workflow pushato, primo run da confermare [P1]
+   ●── CI attivo (GitHub Actions — matrix py3.9-3.12, pytest+ruff) [P1]
 
    TERRITORIO E ANALYTICS
    ○── Dataset builder --provincia / --tutti-comuni    [P4]
