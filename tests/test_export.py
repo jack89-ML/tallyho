@@ -122,3 +122,49 @@ def test_esporta_long_senza_record(tmp_path):
     # solo l'intestazione, nessuna riga di dati
     assert len(righe) == 1
     assert righe[0].split(";")[0] == "data_elezione"
+
+
+REFERENDUM = {
+    "AFFILE": [
+        {
+            "data_elezione": "12/06/2022",
+            "comune": "AFFILE",
+            "provincia": "ROMA",
+            "turno": "1° turno",
+            "elettori": None, "votanti": None, "affluenza_pct": None,
+            "bianche": None, "non_valide": None,
+            "candidati": [],
+            "quesiti": [
+                {"quesito": "Q1. Test", "elettori": 1217, "votanti": 251,
+                 "affluenza_pct": 20.62, "valide": 240, "bianche": 5,
+                 "non_valide": 11,
+                 "si": {"voti": 150, "pct": 62.5},
+                 "no": {"voti": 90, "pct": 37.5}},
+            ],
+        },
+    ],
+}
+
+
+def test_esporta_csv_con_referendum(tmp_path):
+    percorso = tmp_path / "elezioni_ref.csv"
+    esporta_csv(str(percorso), ["AFFILE"], REFERENDUM)
+    testo = percorso.read_text(encoding="utf-8-sig")
+    righe = testo.splitlines()
+    # header + 2 righe (SI e NO del quesito)
+    assert len(righe) == 3
+    assert "12/06/2022;AFFILE;ROMA;1° turno;1217;251;20.62;5;11;Q1. Test;;150;62.5;SI;150;62.5;" in testo
+    assert "12/06/2022;AFFILE;ROMA;1° turno;1217;251;20.62;5;11;Q1. Test;;90;37.5;NO;90;37.5;" in testo
+
+
+def test_esporta_long_con_referendum(tmp_path):
+    percorso = tmp_path / "elezioni_long_ref.csv"
+    esporta_long(str(percorso), ["AFFILE"], REFERENDUM)
+    testo = percorso.read_text(encoding="utf-8-sig")
+    righe = testo.splitlines()
+    # header + 4 righe scheda record (None) + 4 scheda quesito + 2 quesito = 11
+    assert len(righe) == 11
+    assert "scheda;elettori;1217;;;" in testo
+    assert "scheda;votanti;251;20.62;;" in testo
+    assert "quesito;Q1. Test (SI);150;62.5;;" in testo
+    assert "quesito;Q1. Test (NO);90;37.5;;" in testo

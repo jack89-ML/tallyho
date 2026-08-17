@@ -38,6 +38,20 @@ def esporta_csv(percorso: str, comuni: list, risultati: dict) -> None:
                                                l["pct"], l["seggi"]])
                     else:
                         w.writerow(riga + ["", "", "", ""])
+                # referendum: una riga per quesito, due righe SI/NO
+                for q in rec.get("quesiti", []):
+                    q_base = [rec["data_elezione"], rec["comune"],
+                              rec["provincia"], rec.get("turno", "1° turno"),
+                              q["elettori"], q["votanti"],
+                              q["affluenza_pct"], q["bianche"],
+                              q["non_valide"]]
+                    titolo = q["quesito"]
+                    w.writerow(q_base + [titolo, "", q["si"]["voti"],
+                                         q["si"]["pct"], "SI",
+                                         q["si"]["voti"], q["si"]["pct"], ""])
+                    w.writerow(q_base + [titolo, "", q["no"]["voti"],
+                                         q["no"]["pct"], "NO",
+                                         q["no"]["voti"], q["no"]["pct"], ""])
 
 
 def esporta_json(percorso: str, comuni: list, risultati: dict, log: list,
@@ -91,6 +105,23 @@ def esporta_long(percorso: str, comuni: list, risultati: dict) -> None:
                     for l in c["liste"]:
                         w.writerow(base + ["lista", l["lista"], l["voti"],
                                            l["pct"], "", l["seggi"]])
+                # referendum: righe scheda + due righe per quesito (SI/NO)
+                for q in rec.get("quesiti", []):
+                    titolo = q["quesito"]
+                    w.writerow(base + ["scheda", "elettori", q["elettori"],
+                                       "", "", ""])
+                    w.writerow(base + ["scheda", "votanti", q["votanti"],
+                                       q["affluenza_pct"], "", ""])
+                    w.writerow(base + ["scheda", "bianche", q["bianche"],
+                                       "", "", ""])
+                    w.writerow(base + ["scheda", "non_valide",
+                                       q["non_valide"], "", "", ""])
+                    w.writerow(base + ["quesito", titolo + " (SI)",
+                                       q["si"]["voti"], q["si"]["pct"],
+                                       "", ""])
+                    w.writerow(base + ["quesito", titolo + " (NO)",
+                                       q["no"]["voti"], q["no"]["pct"],
+                                       "", ""])
 
 
 def esporta_xlsx(percorso: str, comuni: list, risultati: dict) -> None:
@@ -127,6 +158,18 @@ def esporta_xlsx(percorso: str, comuni: list, risultati: dict) -> None:
                                           l["seggi"]])
                 else:
                     ws.append(riga + ["", "", "", ""])
+            for q in rec.get("quesiti", []):
+                q_base = [rec["data_elezione"], rec["comune"],
+                          rec["provincia"], rec.get("turno", "1° turno"),
+                          q["elettori"], q["votanti"], q["affluenza_pct"],
+                          q["bianche"], q["non_valide"]]
+                titolo = q["quesito"]
+                ws.append(q_base + [titolo, "", q["si"]["voti"],
+                                    q["si"]["pct"], "SI",
+                                    q["si"]["voti"], q["si"]["pct"], ""])
+                ws.append(q_base + [titolo, "", q["no"]["voti"],
+                                    q["no"]["pct"], "NO",
+                                    q["no"]["voti"], q["no"]["pct"], ""])
     wb.save(percorso)
 
 
@@ -157,6 +200,18 @@ def esporta_parquet(percorso: str, comuni: list, risultati: dict) -> None:
                                              l["seggi"]])
                 else:
                     righe.append(riga + ["", "", "", ""])
+            for q in rec.get("quesiti", []):
+                q_base = [rec["data_elezione"], rec["comune"],
+                          rec["provincia"], rec.get("turno", "1° turno"),
+                          q["elettori"], q["votanti"], q["affluenza_pct"],
+                          q["bianche"], q["non_valide"]]
+                titolo = q["quesito"]
+                righe.append(q_base + [titolo, "", q["si"]["voti"],
+                                       q["si"]["pct"], "SI",
+                                       q["si"]["voti"], q["si"]["pct"], ""])
+                righe.append(q_base + [titolo, "", q["no"]["voti"],
+                                       q["no"]["pct"], "NO",
+                                       q["no"]["voti"], q["no"]["pct"], ""])
     tabelle = ["data_elezione", "comune", "provincia", "turno", "elettori",
                "votanti", "affluenza_pct", "bianche", "non_valide",
                "candidato", "eletto", "voti_candidato", "pct_candidato",
