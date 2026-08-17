@@ -31,3 +31,9 @@ def test_integra_dait_filtra_per_comune(tmp_path):
 
 def test_integra_dait_file_mancante():
     assert integra_dait("/non/esiste/ammcom.csv", ["ROMA"]) == {}
+
+
+def test_integra_dait_file_vuoto(tmp_path):
+    p = tmp_path / "ammcom.csv"
+    p.write_text("", encoding="utf-8")
+    assert integra_dait(str(p), ["ROMA"]) == {}

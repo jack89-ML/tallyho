@@ -39,6 +39,15 @@ def estrai_lista(nome: str, celle: list) -> dict:
     return {"lista": nome, "voti": voti, "pct": pct, "seggi": seggi}
 
 
+def _to_int(cella: str):
+    """Converte una cella in intero ignorando i separatori di migliaia;
+    ritorna None se il valore non è numerico (mai eccezioni)."""
+    try:
+        return int(cella.replace(".", ""))
+    except (TypeError, ValueError):
+        return None
+
+
 def parse_affluenza(tabelle: list) -> dict:
     """Elettori, votanti, percentuale dalla tabella di riepilogo."""
     out: dict = {"elettori": None, "votanti": None, "affluenza_pct": None}
@@ -48,9 +57,9 @@ def parse_affluenza(tabelle: list) -> dict:
                 if len(riga) >= 2:
                     k = riga[0].lower()
                     if k.startswith("elettori"):
-                        out["elettori"] = int(riga[1].replace(".", ""))
+                        out["elettori"] = _to_int(riga[1])
                     elif k.startswith("votanti"):
-                        out["votanti"] = int(riga[1].replace(".", ""))
+                        out["votanti"] = _to_int(riga[1])
                         m = re.search(r"([\d,]+)\s*%",
                                       riga[2] if len(riga) > 2 else "")
                         if m:

@@ -100,6 +100,9 @@ def integra_dait(csv_path: str, comuni: list) -> dict:
         return {}
     with open(csv_path, newline="", encoding="utf-8-sig") as f:
         righe_raw = f.read().splitlines()
+    if not righe_raw:
+        print("[!] File DAIT vuoto")
+        return {}
     # scarta le prime righe finché non trovo l'intestazione con i nomi
     start = 0
     for i, r in enumerate(righe_raw[:5]):

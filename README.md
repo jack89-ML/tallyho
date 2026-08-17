@@ -296,10 +296,14 @@ per il periodo 1970-1985).
 ```
 tallyho/
 ├── src/tallyho/
-│   ├── __init__.py      # API pubblica
-│   ├── __main__.py      # python -m tallyho
-│   ├── cli.py           # console script
-│   └── tallyho.py      # logica: decodifica, navigazione, parsing
+│   ├── costanti.py      # costanti condivise (BASE, UA, DAIT_AMMCOM_URL)
+│   ├── navigazione.py   # decodifica opzioni/area, leggi_select/onchange/date, scendi_livello, trova_comune
+│   ├── parsing.py       # estrai_tabelle/liste, parse_affluenza/schede/candidati/risultati
+│   ├── export.py        # esporta_csv/json, scarica_ammcom, integra_dait
+│   ├── tallyho.py       # main() e logica CLI
+│   ├── __init__.py      # API pubblica (16 simboli)
+│   ├── cli.py           # entry point (console script)
+│   └── __main__.py      # entry point (python -m tallyho)
 ├── tests/               # test unitari (decodifica, parsing — senza rete)
 ├── examples/            # esempi di output
 ├── pyproject.toml

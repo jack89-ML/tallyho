@@ -1,6 +1,6 @@
 """Test del parsing delle pagine dei risultati (formati moderno e storico)."""
 
-from tallyho import parse_risultati
+from tallyho import parse_affluenza, parse_risultati
 
 # Pagina comunale moderna (26/05/2019, semplificata ma fedele al formato)
 HTML_MODERNO = """
@@ -87,3 +87,18 @@ def test_parse_pagina_vuota():
     r = parse_risultati("<html><body>nessuna consultazione</body></html>")
     assert r["elettori"] is None
     assert r["candidati"] == []
+
+
+def test_parse_affluenza_cella_non_numerica():
+    # cella non numerica (es. "N.D.") -> nessun crash, campo a None
+    tabelle = [
+        [
+            ["Affluenza"],
+            ["Elettori", "N.D.", ""],
+            ["Votanti", "1.203", "51,30 %"],
+        ],
+    ]
+    out = parse_affluenza(tabelle)
+    assert out["elettori"] is None
+    assert out["votanti"] == 1203
+    assert out["affluenza_pct"] == 51.30

@@ -20,7 +20,6 @@ dati_elezioni/
 .vscode/
 .idea/
 .DS_Store
-.github/
 
 
 # interni (non pubblici: path del server)

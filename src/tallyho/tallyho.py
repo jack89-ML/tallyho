@@ -52,7 +52,7 @@ from datetime import datetime
 
 import requests
 
-from .costanti import BASE, UA
+from .costanti import BASE, TIPO_ETICHETTE, UA
 from .export import (esporta_csv, esporta_json, integra_dait,
                      scarica_ammcom)
 from .navigazione import (leggi_date, leggi_onchange, leggi_select,
@@ -249,7 +249,8 @@ def main():
                 print(f"  [ERR] {data} {comune}: {exc}")
                 time.sleep(args.sleep)
                 continue
-            rec = {"data_elezione": data, "tipo": "Comunali",
+            rec = {"data_elezione": data,
+                   "tipo": TIPO_ETICHETTE.get(args.tipo, args.tipo),
                    "comune": ctx["comune"], "provincia": ctx["provincia"],
                    **parsed}
             risultati[comune].append(rec)
