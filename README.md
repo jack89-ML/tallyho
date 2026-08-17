@@ -1,5 +1,7 @@
 # TallyHo
 
+**English:** [README.en.md](README.en.md)
+
 <p align="center">
   <img src="assets/logo_tallyho.png" alt="TallyHo" width="320">
 </p>
@@ -94,7 +96,7 @@ cinquant'anni di elezioni un giorno alla volta.
    ●── Retry con backoff (2/4/8 s)                     [P2]
    ◐── Catena condivisa tra comuni (~3x meno richieste) [P2]
    ●── Rilevamento cambi del sito (exit 3 se `sel_date` manca) [P3]
-   ○── CI attivo (GitHub Actions) — serve refresh token [P1]
+   ○── CI attivo (GitHub Actions) — workflow pronto, serve push token [P1]
 
    TERRITORIO E ANALYTICS
    ○── Dataset builder --provincia / --tutti-comuni    [P4]
@@ -107,7 +109,7 @@ cinquant'anni di elezioni un giorno alla volta.
    ●── Zenodo + DOI 10.5281/zenodo.21979207 (v1.0.0)   [P3]
    ○── PyPI (pip install tallyho)                      [P6]
    ○── API locale FastAPI                              [P6]
-   ○── README EN + Contributing                        [P3]
+   ●── README EN + Contributing                        [P3]
 ```
 
 Dettaglio delle singole voci (priorità, stato, note operative):
@@ -166,7 +168,10 @@ vedi [ROADMAP.md](ROADMAP.md).
 - **83 test** (offline, senza rete) + test di integrazione opzionale
   (`-m integration`) contro il sito reale; fixture HTML reali in
   `tests/fixtures/`.
-- **README EN** in programma per i contributori internazionali.
+- **Test di integrazione live su 5 tipi di elezione (G/R/F/E/P)**, eseguiti
+  esplicitamente con `pytest -m integration`.
+- **README EN** disponibile in [README.en.md](README.en.md) per i
+  contributori internazionali.
 
 ## Installazione
 
@@ -446,6 +451,27 @@ tallyho/
 ├── pyproject.toml
 └── README.md
 ```
+
+## Contributing
+
+Contributi benvenuti. Prima di aprire una PR:
+
+- **Segnala un bug**: apri una [issue](https://github.com/jack89-ML/tallyho/issues)
+  descrivendo il comando eseguito, il tipo di elezione (`--tipo`), la data e
+  l'output atteso vs. ottenuto. Se possibile allega una pagina HTML salvata
+  (le fixture in `tests/fixtures/` aiutano a riprodurre senza rete).
+- **Proponi una miglioria**: apri una issue per discuterne prima di scrivere
+  codice; controlla la [ROADMAP](ROADMAP.md) per le priorità.
+- **Test obbligatori**: ogni PR deve far girare `pytest` verde (i test
+  offline girano senza rete; i test di integrazione live sono esclusi di
+  default e richiedono `pytest -m integration`). Aggiungi test per il codice
+  nuovo.
+- **Niente sed/awk multilinea**: le modifiche ai file devono essere patch
+  esatte (nessuna sostituzione con regex fragili).
+- **Stile**: italiano per commenti, messaggi e output; inglese solo per
+  README.en.md. Segui lo stile del codice esistente.
+
+Le PR che non rispettano queste regole non vengono considerate.
 
 ## Licenza
 
