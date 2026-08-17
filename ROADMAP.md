@@ -5,17 +5,19 @@ impatto o dipende da fattori esterni).
 
 ## P1 — Migliorie rapide
 
-- [ ] **affluenza_pct nel CSV**: il campo esce vuoto (es. riga Roma 2021).
-      Il sito fornisce la percentuale in pagina; se assente, calcolarla
-      come `votanti / elettori * 100` prima dell'export.
+- [x] **affluenza_pct nel CSV**: il campo usciva vuoto (es. riga Roma 2021).
+      Risolto: fallback `votanti / elettori * 100` quando il sito non
+      espone la percentuale (commit 5b56365, 83000e3). Verificato dal vivo
+      su Roma 12/02/2023 (37.2%).
 - [ ] **CI attivo**: ripristinare `.github/workflows/ci.yml` (già pronto,
       matrix Python 3.9-3.12) — serve `gh auth refresh -s workflow`
-      sull'account di pubblicazione, poi push del workflow.
-- [ ] **Test di integrazione** (rete, opzionali): estendere i test unitari
-      con un test marcato `@pytest.mark.integration` che esegue una singola
-      data su un comune noto (es. `--data 03/10/2021 --comuni ROMA`) e
-      verifica che il CSV contenga almeno una riga. Da escludere dal CI
-      di default (o eseguire su schedule) per non dipendere dal sito.
+      sull'account di pubblicazione, poi push del workflow. Il `.gitignore`
+      non lo blocca più (riga rimossa in 83000e3); il file ci.yml è
+      conservato in /mnt/vault/osint-savelli/analisi/tallyho_archivio/ci.yml.
+- [x] **Test di integrazione** (rete, opzionali): fatto — `tests/test_integrazione.py`
+      marcato `@pytest.mark.integration`, escluso dal default con
+      `addopts="-m 'not integration'"` (commit 83000e3). Da eseguire su
+      schedule nel CI quando riattivato.
 
 ## P2 — Ottimizzazioni
 
@@ -46,4 +48,10 @@ impatto o dipende da fattori esterni).
       per comune (limite della fonte). Valutare se aggregare i dati per
       comune via open data DAIT (scrutini per sezione, se pubblicati) —
       solo come ricerca, senza promettere funzionalità.
+- [ ] **Archiviazione Zenodo + DOI**: collegare il repo a Zenodo (servizio
+      CERN, gratuito): a ogni release GitHub, Zenodo archivia una snapshot
+      e assegna un DOI stabile da citare nelle pubblicazioni. Il file
+      `.zenodo.json` con i metadati è già pronto nella radice; manca il
+      collegamento account (azione manuale su zenodo.org) e la prima
+      release. Dopo: inserire il DOI in `CITATION.cff` e nel README.
 

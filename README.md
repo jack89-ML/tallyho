@@ -39,19 +39,33 @@ cinquant'anni di elezioni un giorno alla volta.
       **Costituente** (A)
 - [x] Discesa gerarchica dinamica: regione → provincia → comune (comunali),
       regione con risultati a quel livello (regionali), circoscrizione →
-      collegi plurinominali/uninominali (politiche post-2017)
+      collegi plurinominali/uninominali (politiche post-2017), 5 livelli
+      per europee (circoscrizione → regione → provincia → comune) e
+      provinciali (regione → provincia → collegio → comune)
 - [x] Gestione automatica delle province storiche (i comuni di una provincia
       istituita nel 1992 risultavano nella provincia originaria per le
       elezioni precedenti)
 - [x] Formato risultati moderno (candidati + liste) e storico
       (sole liste, amministratori eletti dal consiglio)
+- [x] Referendum (F): per ogni quesito, voti SI/NO, percentuali, affluenza
+      e schede
+- [x] Distinzione del turno: campo `turno` ("1° turno" / "ballottaggio")
+      in CSV e JSON
+- [x] Affluenza calcolata (fallback `votanti/elettori*100`) quando il sito
+      non espone la percentuale
 - [x] Export CSV (delimitatore `;`, UTF-8 BOM per Excel) e JSON
+- [x] Export aggiuntivi: `--long` (formato tidy per pandas/R), `--xlsx`
+      (Excel, richiede `openpyxl`), `--parquet` (richiede `pyarrow`)
+- [x] File di configurazione `--config` (TOML/YAML) per riusare le opzioni
 - [x] Esplorazione dei valori del form (`--elenca`): regioni, province,
       comuni e date reali del sito senza ispezionare il browser
 - [x] Valore della regione ricavato automaticamente dal nome
 - [x] Integrazione anagrafe amministratori DAIT (`--dait auto` scarica da
       solo il file ufficiale del Ministero, con cache)
 - [x] Rispetto del server: pausa configurabile tra le richieste
+
+> **Nuovi qui?** C'è un [cheatsheet](CHEATSHEET.md) con i comandi
+> essenziali spiegati passo passo.
 
 ## Installazione
 
@@ -109,6 +123,10 @@ tallyho --comuni ROMA --out ./dati --sleep 2.0
 | `--data` | — | Processa solo una data (gg/mm/aaaa) |
 | `--solo-ultima-data` | — | Solo l'ultima data (test) |
 | `--dait CSV\|auto` | — | Anagrafe amministratori DAIT nel JSON (`auto` = download automatico) |
+| `--long` | off | Esporta anche il CSV in formato tidy (una riga per osservazione, pronto per pandas/R) |
+| `--xlsx` | off | Esporta anche in Excel (.xlsx) — richiede `openpyxl` (`pip install "tallyho[xlsx]"`) |
+| `--parquet` | off | Esporta anche in Parquet — richiede `pyarrow` (`pip install "tallyho[parquet]"`) |
+| `--config` | — | File di configurazione TOML/YAML con i default delle opzioni (la CLI ha precedenza) |
 
 ## Esplorare i valori senza aprire il browser
 
@@ -296,16 +314,18 @@ per il periodo 1970-1985).
 ```
 tallyho/
 ├── src/tallyho/
-│   ├── costanti.py      # costanti condivise (BASE, UA, DAIT_AMMCOM_URL)
+│   ├── costanti.py      # costanti condivise (BASE, UA, DAIT_AMMCOM_URL, TIPO_ETICHETTE)
 │   ├── navigazione.py   # decodifica opzioni/area, leggi_select/onchange/date, scendi_livello, trova_comune
-│   ├── parsing.py       # estrai_tabelle/liste, parse_affluenza/schede/candidati/risultati
-│   ├── export.py        # esporta_csv/json, scarica_ammcom, integra_dait
+│   ├── parsing.py       # estrai_tabelle/liste, parse_affluenza/schede/candidati/risultati, parse_referendum, parse_candidati_regionali
+│   ├── export.py        # esporta_csv/json/long/xlsx/parquet, scarica_ammcom, integra_dait
 │   ├── tallyho.py       # main() e logica CLI
-│   ├── __init__.py      # API pubblica (16 simboli)
+│   ├── __init__.py      # API pubblica
 │   ├── cli.py           # entry point (console script)
 │   └── __main__.py      # entry point (python -m tallyho)
-├── tests/               # test unitari (decodifica, parsing — senza rete)
+├── tests/               # test unitari (decodifica, parsing, export, config — senza rete)
+│   └── fixtures/        # pagine HTML reali del sito (per i test di parsing)
 ├── examples/            # esempi di output
+├── CHEATSHEET.md        # guida rapida per chi inizia
 ├── pyproject.toml
 └── README.md
 ```
@@ -343,3 +363,10 @@ In BibTeX:
 Il file `CITATION.cff` nella radice del repository abilita il pulsante
 **Cite this repository** su GitHub, che genera la citazione nei formati
 APA e BibTeX.
+
+Ogni release di TallyHo è inoltre archiviata su
+[Zenodo](https://zenodo.org) (servizio CERN di archiviazione per la
+ricerca) con un **DOI permanente**: una volta creata la prima release su
+GitHub, il DOI della versione compare qui e nel `CITATION.cff`. Il DOI
+identifica la versione archiviata in modo stabile, anche se il link a
+GitHub cambiasse.

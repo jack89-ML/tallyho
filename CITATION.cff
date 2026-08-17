@@ -1,3 +1,7 @@
+# Dopo la prima release su GitHub (e il collegamento a Zenodo), inserisci
+# qui il DOI assegnato da Zenodo, es:
+# doi: 10.5281/zenodo.1234567
+# Poi aggiorna anche la sezione "Citazione" del README con lo stesso DOI.
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:

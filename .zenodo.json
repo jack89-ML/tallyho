@@ -1,0 +1,24 @@
+{
+  "title": "TallyHo — serie storica elettorale italiana, comune per comune",
+  "description": "TallyHo estrae la serie storica elettorale italiana (dal 1946) dall'Archivio Storico delle Elezioni del Ministero dell'Interno (DAIT), comune per comune, e la consegna in CSV/JSON (più Excel, Parquet e formato tidy per pandas/R). Simula la navigazione del form JavaScript del sito ufficiale: nessuna API pubblica, uso moderato con pausa configurabile. Per ogni comune: tutte le date disponibili, affluenza, schede, candidati e liste, referendum per quesito (SI/NO), distinzione 1° turno/ballottaggio, integrazione anagrafe amministratori DAIT.",
+  "creators": [
+    {
+      "name": "Peracchio, Jacopo",
+      "affiliation": "Independent researcher"
+    }
+  ],
+  "keywords": [
+    "elezioni",
+    "italia",
+    "ministero-interno",
+    "dait",
+    "open-data",
+    "serie-storica",
+    "scienze-sociali",
+    "politica",
+    "scraper"
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open"
+}
