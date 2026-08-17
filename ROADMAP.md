@@ -47,9 +47,3 @@ impatto o dipende da fattori esterni).
       comune via open data DAIT (scrutini per sezione, se pubblicati) —
       solo come ricerca, senza promettere funzionalità.
 
-## Note
-
-- La generazione del logo definitivo via AI è in sospeso (credito
-  OpenRouter esaurito); i prompt sono in `assets/` per rigenerarlo.
-- Il post su r/osinttools è online; su r/OSINT serve l'approvazione dei
-  mod (removed by spam filter); r/DataHoarder da riprovare dopo 24-48 h.
