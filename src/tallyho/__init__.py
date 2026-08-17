@@ -2,23 +2,25 @@
 
 __version__ = "1.0.0"
 
-from .tallyho import (  # noqa: F401
-    BASE,
+from .costanti import BASE  # noqa: F401
+from .export import integra_dait  # noqa: F401
+from .navigazione import (  # noqa: F401
     decodifica_area,
     decodifica_opzione,
-    estrai_lista,
-    estrai_tabelle,
-    integra_dait,
     leggi_date,
     leggi_onchange,
     leggi_select,
     pagina_ha_risultati,
+    scendi_livello,
+    trova_comune,
+)
+from .parsing import (  # noqa: F401
+    estrai_lista,
+    estrai_tabelle,
     parse_affluenza,
     parse_candidati,
     parse_risultati,
     parse_schede,
-    scendi_livello,
-    trova_comune,
 )
 
 __all__ = [

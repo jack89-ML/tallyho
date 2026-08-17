@@ -2,7 +2,7 @@
 
 import json
 
-from tallyho.tallyho import esporta_csv, esporta_json
+from tallyho.export import esporta_csv, esporta_json
 
 RISULTATI = {
     "ROMA": [

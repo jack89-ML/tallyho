@@ -282,6 +282,10 @@ per il periodo 1970-1985).
 
 - Il server non fornisce un'API pubblica: questo strumento automatizza la
   navigazione del form ufficiale; usare con moderazione (`--sleep`).
+- Prima di un uso esteso, verifica `robots.txt` e i termini d'uso del sito
+  (`elezionistorico.interno.gov.it`) e rispettane le eventuali limitazioni:
+  l'uso moderato già previsto non sostituisce la conformità alle condizioni
+  del portale.
 - Per le **elezioni politiche** il livello minimo pubblicato è il collegio
   uninominale/plurinominale, non il comune: la ricerca per comune non trova
   risultati (limite della fonte, non dello strumento).
