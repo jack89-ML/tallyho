@@ -11,11 +11,9 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
       Risolto: fallback `votanti / elettori * 100` quando il sito non
       espone la percentuale (commit 5b56365, 83000e3). Verificato dal vivo
       su Roma 12/02/2023 (37.2%).
-- [ ] **CI attivo**: ripristinare `.github/workflows/ci.yml` (già pronto,
-      matrix Python 3.9-3.12) — serve `gh auth refresh -s workflow`
-      sull'account di pubblicazione, poi push del workflow. Il `.gitignore`
-      non lo blocca più (riga rimossa in 83000e3); il file ci.yml è
-      conservato in /mnt/vault/osint-savelli/analisi/tallyho_archivio/ci.yml.
+- [ ] **CI attivo**: ripristinare il workflow GitHub Actions (matrix
+      Python 3.9-3.12, pytest + ruff) — serve autorizzare lo scope
+      `workflow` sul token di pubblicazione, poi il push del workflow.
 - [x] **Test di integrazione** (rete, opzionali): fatto — `tests/test_integrazione.py`
       marcato `@pytest.mark.integration`, escluso dal default con
       `addopts="-m 'not integration'"` (commit 83000e3). Da eseguire su

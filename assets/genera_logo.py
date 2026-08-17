@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Genera 3 varianti del logo TallyHo: mio->gpt-image-2, qwen->gpt-image-2, qwen->mai-image-2.5-pro."""
 import json
+import os
 import re
 import time
 import urllib.request
 
-KEY = open('/home/hermes/.hermes/.openrouter_key').read().strip()
+KEY = os.environ.get("OPENROUTER_API_KEY") or open(
+    os.path.expanduser("~/.config/openrouter/key")).read().strip()
 API = "https://openrouter.ai/api/v1/images/generations"
 
 prompt_mio = open('prompt_logo_mio.txt', encoding='utf-8').read()

@@ -22,6 +22,6 @@ dati_elezioni/
 .DS_Store
 
 
-# interni (non pubblici: path del server)
+# file di lavoro interni (mai pubblici)
 prompt-migliorie.md
 evals/
