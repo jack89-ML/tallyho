@@ -648,11 +648,20 @@ def main():
                 log.append({"data": data, "comune": comune, "esito": "ERRORE",
                             "dettaglio": str(exc)})
                 print(f"  [ERR] {data} {comune}: {exc}")
+                time.sleep(args.sleep)
                 continue
             if html_ris is None:
                 log.append({"data": data, "comune": comune, "esito": "NON_VOTATO"})
+                time.sleep(args.sleep)
                 continue
-            parsed = parse_risultati(html_ris)
+            try:
+                parsed = parse_risultati(html_ris)
+            except Exception as exc:  # noqa: BLE001
+                log.append({"data": data, "comune": comune, "esito": "ERRORE",
+                            "dettaglio": str(exc)})
+                print(f"  [ERR] {data} {comune}: {exc}")
+                time.sleep(args.sleep)
+                continue
             rec = {"data_elezione": data, "tipo": "Comunali",
                    "comune": ctx["comune"], "provincia": ctx["provincia"],
                    **parsed}
