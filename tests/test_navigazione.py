@@ -120,3 +120,24 @@ def test_pagina_ha_risultati_solo_affluenza():
     # affluenza presente ma nessuna tabella candidati/liste -> non è la
     # pagina finale dei risultati
     assert pagina_ha_risultati(HTML_SOLO_AFFLUENZA) is False
+
+
+HTML_REFERENDUM = """
+<html><body>
+<div class="dati_referendum_titolo_quesito">Quesito 1</div>
+<table><tr><th>SI</th><th>NO</th></tr><tr><td>150</td><td>90</td></tr></table>
+</body></html>
+"""
+
+
+def test_pagina_ha_risultati_referendum():
+    # pagina referendum: div del quesito + tabella SI/NO (niente candidati)
+    assert pagina_ha_risultati(HTML_REFERENDUM) is True
+
+
+def test_pagina_ha_risultati_referendum_solo_tabella_si_no():
+    # anche senza il div del quesito, una tabella con colonne SI/NO è una
+    # pagina di risultati (referendum)
+    html = ("<html><body><table><tr><th>SI</th><th>NO</th></tr>"
+            "<tr><td>150</td><td>90</td></tr></table></body></html>")
+    assert pagina_ha_risultati(html) is True

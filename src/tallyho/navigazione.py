@@ -100,6 +100,24 @@ def scendi_livello(sessione, page_path: str, page_var: str, valore: str) -> str:
     return r.text
 
 
+def _scegli_area(aree):
+    """Sceglie l'area ITALIA tra le opzioni di `sel_aree`.
+
+    Per i referendum le aree sono [ESTERO, ITALIA+ESTERO, ITALIA] e la prima
+    opzione (ESTERO) NON porta ai risultati comunali: serve l'area il cui
+    testo è ITALIA. Preferisce la voce esatta 'ITALIA', altrimenti la prima
+    che la contiene; se nessuna corrisponde (tipi G/R/C/S/E/P con la sola
+    area ITALIA, dove comunque la prima è già quella giusta) torna aree[0].
+    """
+    for v, t in aree:
+        if t.strip().upper() == "ITALIA":
+            return (v, t)
+    for v, t in aree:
+        if "ITALIA" in t.strip().upper():
+            return (v, t)
+    return aree[0]
+
+
 def trova_comune(sessione, data, comune_target, tipo, regione_value,
                  nome_regione, province_target):
     """
@@ -122,14 +140,16 @@ def trova_comune(sessione, data, comune_target, tipo, regione_value,
     r.raise_for_status()
     html_p = r.text
 
-    # passo 2: area (solitamente l'unica opzione reale)
+    # passo 2: area (per i referendum ci sono più aree — ESTERO, ITALIA+ESTERO,
+    # ITALIA — e serve l'area ITALIA; per gli altri tipi la prima è l'Italia)
     aree = leggi_select(html_p, "sel_aree")
     if not aree:
         return None, None
+    area = _scegli_area(aree)
     pp, pv = leggi_onchange(html_p, "sel_aree")
     html_p = scendi_livello(sessione,
                             pp or f"index.php?tpel={tipo}&dtel={data}&es0=S",
-                            "tpa", aree[0][0])
+                            "tpa", area[0])
 
     # passo 3: regione / circoscrizione (livello 2)
     regioni = leggi_select(html_p, "sel_sezione2")
@@ -186,6 +206,14 @@ def _scendi_fino_a_comune(sessione, html_p, livello, comune_target,
     candidate = province or opzioni
     for v, t in candidate:
         html_giu = scendi_livello(sessione, pp, pv, v)
+        # Se scendendo si arriva DIRETTAMENTE a una pagina finale (risultati
+        # oppure nessun altro `sel_sezione`) significa che questo è il livello
+        # COMUNE: il comune target non era tra le opzioni -> NON_VOTATO, senza
+        # mai restituire i dati di un altro comune (es. ROMA al posto di
+        # AFFILE).
+        if (pagina_ha_risultati(html_giu)
+                or not leggi_select(html_giu, f"sel_sezione{livello + 1}")):
+            return None, None
         ctx = dict(contesto)
         if province:
             ctx["provincia"] = t
@@ -198,10 +226,19 @@ def _scendi_fino_a_comune(sessione, html_p, livello, comune_target,
 
 def pagina_ha_risultati(html_page: str) -> bool:
     """True se la pagina contiene già la tabella risultati (affluenza +
-    candidati o liste), tipico del livello più basso della gerarchia."""
+    candidati o liste), oppure un quesito referendario (tabelle SI/NO)."""
+    # referendum: div dei quesiti (`dati_referendum_titolo_quesito`)
+    if "dati_referendum_titolo_quesito" in html_page:
+        return True
     tabelle = estrai_tabelle(html_page)
     if not tabelle:
         return False
+    # referendum: tabella con colonne SI/NO (header con celle "SI" e "NO")
+    for tab in tabelle:
+        if tab and tab[0]:
+            celle = [c.lower() for c in tab[0]]
+            if "si" in celle and "no" in celle:
+                return True
     ha_affluenza = any(tab and tab[0]
                        and "affluenza" in tab[0][0].lower() for tab in tabelle)
     if not ha_affluenza:
