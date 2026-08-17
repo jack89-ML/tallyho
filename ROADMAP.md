@@ -11,12 +11,11 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
       Risolto: fallback `votanti / elettori * 100` quando il sito non
       espone la percentuale (commit 5b56365, 83000e3). Verificato dal vivo
       su Roma 12/02/2023 (37.2%).
-- [~] **CI attivo**: workflow pronto e versionato in
+- [~] **CI attivo**: workflow versionato e pushato in
       `.github/workflows/ci.yml` (matrix Python 3.9-3.12,
-      `pytest -m "not integration"` + `ruff check`). Resta da autorizzare lo
-      scope `workflow` sul token di pubblicazione: se il push del file sotto
-      `.github/workflows` fallisce con 403, serve `gh auth refresh -s
-      workflow` e poi il push.
+      `pytest -m "not integration"` + `ruff check`); scope `workflow`
+      autorizzato sul token (17/08) e push del workflow riuscito. Resta da
+      confermare il primo run CI verde nella tab Actions di GitHub.
 - [x] **Test di integrazione** (rete, opzionali): fatto — `tests/test_integrazione.py`
       marcato `@pytest.mark.integration`, escluso dal default con
       `addopts="-m 'not integration'"` (commit 83000e3). Esteso a 5 tipi di
@@ -31,9 +30,10 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
       `trova_comune` per eseguire una sola volta la parte comune per data e
       scendere poi per provincia/comune: ~3x meno richieste con 3 comuni,
       molto di più con liste lunghe. *(programmato: cronjob 01/09)*
-- [ ] **Retry con backoff**: su errori di rete/HTTP 5xx, riprovare con
-      attesa esponenziale (es. 2, 4, 8 s) prima di segnare `ERRORE` — il
-      sito è un archivio ministeriale con picchi di traffico.
+- [x] **Retry con backoff**: fatto — `CachedSession.get()` ritenta gli
+      errori transitori (ConnectionError, Timeout, HTTP 5xx) con attesa
+      esponenziale 2/4/8 s (max 3 tentativi); i 4xx non vengono ritentati
+      (commit bd0c00c). Test dedicati in test_cache.py.
 - [x] **Cache dei form decodificati**: fatta — `CachedSession` con SQLite
       in `~/.cache/tallyho/cache.db` (commit e185305), opzioni `--no-cache`
       e `--cache-ttl`. Verificata dal vivo: 0% → 100% di richieste servite
@@ -41,11 +41,12 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
 
 ## P3 — Robustezza e documentazione
 
-- [ ] **Tolleranza ai cambi del sito**: monitorare la struttura del form
-      (presenza dei `sel_sezione*`, formato delle option) e, se cambia,
-      fallire con un messaggio chiaro che indica cosa cercare, invece di
-      un generico "non votato". Idea: uno snapshot di riferimento dei
-      selettori da confrontare a ogni run.
+- [x] **Tolleranza ai cambi del sito**: fatto (versione base) — se il
+      select `sel_date` manca nella pagina iniziale, TallyHo esce con un
+      messaggio diagnostico esplicito e codice 3 invece di produrre
+      `NON_VOTATO` silenziosi (commit bd0c00c, test dedicato). Resta
+      l'estensione "snapshot completo dei selettori" come miglioria futura
+      (parte già coperta dal rilevamento).
 - [x] **README in inglese**: fatto — `README.en.md` (traduzione completa con
       pitch, funzionalità, installazione, uso, opzioni, formato output,
       citazione e DOI), link dal README principale, sezione "Contributing"
@@ -90,3 +91,9 @@ Legenda stato: `[x]` fatto · `[~]` in corso · `[ ]` da fare
 - [ ] **Grafici serie storiche** (matplotlib/altair): affluenza e voti nel
       tempo.
 - [ ] **CLI completions** (argcomplete): completamento tab per le shell.
+- [ ] **Server MCP per Hermes**: esporre TallyHo come server MCP (Model
+      Context Protocol) così gli agenti Hermes possono chiamarlo come tool
+      direttamente in chat (es. `estrai_serie_storica`, `elenca_date`,
+      `integra_dait`). Registrazione in `mcp_servers` del config Hermes
+      (Via A locale, immediata) e, a repo stabile, proposta di entry nel
+      catalog ufficiale via PR al repo hermes-agent (Via B pubblica).

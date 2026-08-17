@@ -89,14 +89,14 @@ cinquant'anni di elezioni un giorno alla volta.
    EXPORT
    ●── CSV (UTF-8 BOM, ;) · JSON · --long (tidy pandas/R)
    ●── --xlsx (openpyxl) · --parquet (pyarrow)
-   ◐── Report Markdown per comune (agenti LLM / KB)   [P6]
+   ○── Report Markdown per comune (agenti LLM / KB)   [P6]
 
    ROBUSTEZZA
    ●── Cache dei form in SQLite (~/.cache/tallyho)     [P2]
    ●── Retry con backoff (2/4/8 s)                     [P2]
    ◐── Catena condivisa tra comuni (~3x meno richieste) [P2]
    ●── Rilevamento cambi del sito (exit 3 se `sel_date` manca) [P3]
-   ○── CI attivo (GitHub Actions) — workflow pronto, serve push token [P1]
+   ◐── CI attivo (GitHub Actions) — workflow pushato, primo run da confermare [P1]
 
    TERRITORIO E ANALYTICS
    ○── Dataset builder --provincia / --tutti-comuni    [P4]
@@ -109,6 +109,7 @@ cinquant'anni di elezioni un giorno alla volta.
    ●── Zenodo + DOI 10.5281/zenodo.21979207 (v1.0.0)   [P3]
    ○── PyPI (pip install tallyho)                      [P6]
    ○── API locale FastAPI                              [P6]
+   ○── Server MCP per agenti Hermes                    [P6]
    ●── README EN + Contributing                        [P3]
 ```
 
@@ -165,7 +166,7 @@ vedi [ROADMAP.md](ROADMAP.md).
 ### Qualità e test
 - **Architettura modulare**: `costanti` / `navigazione` / `parsing` /
   `export` / `cache` / `tallyho` (CLI). API pubblica in `__init__.py`.
-- **83 test** (offline, senza rete) + test di integrazione opzionale
+- **84 test** (offline, senza rete) + test di integrazione opzionale
   (`-m integration`) contro il sito reale; fixture HTML reali in
   `tests/fixtures/`.
 - **Test di integrazione live su 5 tipi di elezione (G/R/F/E/P)**, eseguiti

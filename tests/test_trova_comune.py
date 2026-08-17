@@ -131,6 +131,34 @@ def test_trova_comune_provinciali_5_livelli():
     assert any("lev4=" in u for u in sess.urls)
 
 
+def _risposte_regionali():
+    """Regionali: la pagina dopo la selezione della regione contiene GIÀ i
+    risultati (early-return) — nessuna discesa per comune."""
+    return [
+        ("lev1=", HTML_RISULTATI),  # dopo la regione: pagina dei risultati
+        ("tpa=", _select("sel_sezione2", "ne1", [("12-lev112", "LAZIO")])),
+        ("tpel=R&dtel=", _select(
+            "sel_aree", "ne0", [("I-lev00-levsut00-msN-tpeA", "ITALIA")],
+            page_path="index.php?tpel=R&dtel=12/02/2023&es0=S")),
+    ]
+
+
+def test_trova_comune_regionali_early_return():
+    """Per le regionali (R) il livello regione È GIÀ la pagina dei risultati:
+    trova_comune deve fermarsi lì e replicare il contesto per comune, senza
+    tentare una discesa per-comune (regressione possibile nel refactor della
+    catena condivisa)."""
+    sess = FakeSessionPerUrl(_risposte_regionali())
+    html, ctx = trova_comune(sess, "12/02/2023", "ROMA", "R", None,
+                             "LAZIO", ("ROMA",))
+    assert html == HTML_RISULTATI
+    assert ctx["regione"] == "LAZIO"
+    assert ctx["provincia"] == ""
+    assert ctx["comune"].upper() == "ROMA"
+    # data, area, regione = 3 richieste: nessuna discesa fino al comune
+    assert len(sess.urls) == 3
+
+
 def test_trova_comune_regione_non_trovata():
     # nessuna regione/circoscrizione corrisponde -> (None, None)
     sess = FakeSessionPerUrl(_risposte_comunali())
