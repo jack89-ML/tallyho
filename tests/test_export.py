@@ -113,3 +113,12 @@ def test_esporta_long(tmp_path):
     assert "lista;PARTITO DEMOCRATICO;166194;16.38;;18" in righe[6]
     # candidato senza lista (seggi vuoto)
     assert "candidato;MICHELLI ENRICO;299594;26.99;False;" in righe[7]
+
+
+def test_esporta_long_senza_record(tmp_path):
+    percorso = tmp_path / "elezioni_long_vuoto.csv"
+    esporta_long(str(percorso), ["ROMA"], {"ROMA": []})
+    righe = percorso.read_text(encoding="utf-8-sig").splitlines()
+    # solo l'intestazione, nessuna riga di dati
+    assert len(righe) == 1
+    assert righe[0].split(";")[0] == "data_elezione"

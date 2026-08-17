@@ -96,7 +96,7 @@ def esporta_long(percorso: str, comuni: list, risultati: dict) -> None:
 def esporta_xlsx(percorso: str, comuni: list, risultati: dict) -> None:
     """Scrive i risultati in Excel (.xlsx) — richiede il pacchetto opzionale
     openpyxl (pip install tallyho[xlsx]). Struttura: un foglio 'risultati'
-    con le stesse righe del CSV più un foglio 'log' per comune.
+    con le stesse righe del CSV (una riga per lista/candidato).
     """
     try:
         import openpyxl

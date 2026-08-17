@@ -137,13 +137,19 @@ def esplora_livello(sessione, tipo, data, livello, nome_regione,
 def _carica_config(path):
     """Carica un file di configurazione TOML (o YAML se pyyaml presente).
 
-    Ritorna un dict con le chiavi = nomi lunghi delle opzioni CLI.
-    Gli argomenti passati esplicitamente a riga di comando hanno precedenza.
+    Ritorna un dict con le chiavi = nomi lunghi delle opzioni CLI (sia con
+    '-' sia con '_'). Gli argomenti passati esplicitamente a riga di comando
+    hanno precedenza (la precedenza è applicata in `_applica_config`).
     """
     if not os.path.isfile(path):
         print(f"[!] File di configurazione non trovato: {path}")
         return {}
-    testo = open(path, encoding="utf-8").read()
+    try:
+        with open(path, encoding="utf-8") as f:
+            testo = f.read()
+    except (OSError, UnicodeDecodeError) as exc:
+        print(f"[!] Config illeggibile ({exc}) — ignoro il config")
+        return {}
     # TOML (stdlib da Python 3.11; fallback a tomli se presente)
     try:
         import tomllib
@@ -152,7 +158,11 @@ def _carica_config(path):
             import tomli as tomllib
         except ImportError:
             tomllib = None
-    if tomllib is not None and path.endswith((".toml", ".tml")):
+    if path.endswith((".toml", ".tml")):
+        if tomllib is None:
+            print("[!] Config TOML richiede tomli (pip install tomli) "
+                  "su Python < 3.11")
+            return {}
         try:
             return dict(tomllib.loads(testo))
         except Exception as exc:  # noqa: BLE001
@@ -174,59 +184,111 @@ def _carica_config(path):
     return {}
 
 
+# Opzioni riconosciute e relativi default reali. Servono a `_imposta_default`
+# per riempire le opzioni mai impostate né via CLI né via config (con
+# `default=argparse.SUPPRESS` argparse non crea alcun attributo).
+_DEFAULT = {
+    "comuni": None,
+    "elenca": None,
+    "regione": None,
+    "nome_regione": "LAZIO",
+    "province": "ROMA",
+    "tipo": "G",
+    "out": "dati_elezioni",
+    "sleep": 1.2,
+    "solo_ultima_data": False,
+    "data": None,
+    "dait": None,
+    "long": False,
+    "xlsx": False,
+    "parquet": False,
+}
+
+
+def _applica_config(args, cfg):
+    """Applica i valori del file di configurazione ad `args`, ma SOLO per le
+    opzioni non passate esplicitamente a riga di comando (la CLI ha sempre la
+    precedenza). Le chiavi sono accettate sia con '-' (nome lungo della CLI,
+    es. 'nome-regione') sia con '_' (attributo argparse). Le liste TOML/YAML
+    per comuni/province vengono unite in una stringa separata da virgola.
+    """
+    for chiave, valore in cfg.items():
+        nome = chiave.replace("-", "_")
+        if nome not in _DEFAULT:
+            continue  # chiave sconosciuta: ignora
+        if hasattr(args, nome):
+            continue  # già passata a riga di comando: la CLI vince
+        if nome in ("comuni", "province") and isinstance(valore, (list, tuple)):
+            valore = ",".join(str(v) for v in valore)
+        setattr(args, nome, valore)
+
+
+def _imposta_default(args):
+    """Riempie `args` con i default per le opzioni mai impostate (né via CLI
+    né via config). Necessario perché con `default=argparse.SUPPRESS` le
+    opzioni assenti non creano alcun attributo.
+    """
+    for nome, valore in _DEFAULT.items():
+        if not hasattr(args, nome):
+            setattr(args, nome, valore)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="TallyHo — ti porta a spasso nella storia elettorale italiana "
                     "(Archivio Storico DAIT, 1946-oggi)")
-    ap.add_argument("--comuni",
+    ap.add_argument("--comuni", default=argparse.SUPPRESS,
                     help="Comuni da cercare, separati da virgola (es. ROMA,MILANO)")
     ap.add_argument("--elenca", choices=["date", "regioni", "province", "comuni"],
+                    default=argparse.SUPPRESS,
                     help="Esplora i valori REALI del form del sito per la data "
                          "scelta (stampa valore = nome delle <option>) e esce: "
                          "serve a scoprire --regione/--province senza aprire "
                          "il browser")
-    ap.add_argument("--regione", default=None,
+    ap.add_argument("--regione", default=argparse.SUPPRESS,
                     help="Valore option della regione (es. 99-lev199). "
                          "OPZIONALE: se omesso viene ricavato automaticamente "
                          "dal nome (--nome-regione). Per scoprirlo: "
                          "--elenca regioni")
-    ap.add_argument("--nome-regione", default="LAZIO",
+    ap.add_argument("--nome-regione", default=argparse.SUPPRESS,
                     help="Nome della regione/circoscrizione da cercare "
                          "(per le elezioni politiche la circoscrizione ha lo "
                          "stesso nome della regione)")
-    ap.add_argument("--province", default="ROMA",
+    ap.add_argument("--province", default=argparse.SUPPRESS,
                     help="Province ammesse (virgola, per nome). Per i comuni "
                          "di province istituite dopo il 1992, indicare anche "
                          "la provincia storica per coprire le elezioni "
                          "precedenti (es. --province LECCO,COMO: Lecco è stata istituita nel 1992, prima i suoi comuni erano in provincia di Como)")
-    ap.add_argument("--tipo", default="G",
+    ap.add_argument("--tipo", default=argparse.SUPPRESS,
                     help="Tipo elezione: G=comunali (default), C=camera, S=senato, "
                          "E=europee, F=referendum, R=regionali, P=provinciali, A=costituente")
-    ap.add_argument("--out", default="dati_elezioni",
+    ap.add_argument("--out", default=argparse.SUPPRESS,
                     help="Cartella di output (default dati_elezioni)")
-    ap.add_argument("--sleep", type=float, default=1.2,
+    ap.add_argument("--sleep", type=float, default=argparse.SUPPRESS,
                     help="Secondi tra una data e l'altra (default 1.2)")
     ap.add_argument("--solo-ultima-data", action="store_true",
+                    default=argparse.SUPPRESS,
                     help="Processa solo l'ultima data disponibile (test)")
-    ap.add_argument("--data", help="Processa solo questa data (gg/mm/aaaa)")
-    ap.add_argument("--dait", metavar="CSV|auto",
+    ap.add_argument("--data", default=argparse.SUPPRESS,
+                    help="Processa solo questa data (gg/mm/aaaa)")
+    ap.add_argument("--dait", metavar="CSV|auto", default=argparse.SUPPRESS,
                     help="Anagrafe amministratori DAIT da integrare nel JSON "
                          "(sindaci/commissari in carica con date e lista). "
                          "'auto' scarica da solo il file ufficiale "
                          "ammcom.csv dal portale open data del Ministero "
                          "(con cache); oppure passa il percorso di un CSV "
                          "già scaricato")
-    ap.add_argument("--long", action="store_true",
+    ap.add_argument("--long", action="store_true", default=argparse.SUPPRESS,
                     help="Esporta anche il CSV in formato LONG/TIDY "
                          "normalizzato (una riga per osservazione, "
                          "pronto per pandas/R): elezioni_<ts>_long.csv")
-    ap.add_argument("--xlsx", action="store_true",
+    ap.add_argument("--xlsx", action="store_true", default=argparse.SUPPRESS,
                     help="Esporta anche in Excel (.xlsx) — richiede "
                          "openpyxl (pip install 'tallyho[xlsx]')")
-    ap.add_argument("--parquet", action="store_true",
+    ap.add_argument("--parquet", action="store_true", default=argparse.SUPPRESS,
                     help="Esporta anche in Parquet — richiede pyarrow "
                          "(pip install 'tallyho[parquet]')")
-    ap.add_argument("--config",
+    ap.add_argument("--config", default=argparse.SUPPRESS,
                     help="File di configurazione TOML/YAML con i default "
                          "degli argomenti (chiavi = nomi lunghi delle "
                          "opzioni, es. comuni, tipo, out, sleep). Gli "
@@ -234,17 +296,13 @@ def main():
                          "precedenza sul file.")
     args = ap.parse_args()
 
-    # ---- config file: i default dal file valgono solo se l'opzione non
-    # è stata passata esplicitamente a riga di comando ----
-    if args.config:
-        cfg = _carica_config(args.config)
-        for chiave, valore in cfg.items():
-            if chiave in ("long", "xlsx", "parquet"):
-                # flag booleani: attivi solo se NON già impostati
-                if not getattr(args, chiave) and valore:
-                    setattr(args, chiave, True)
-            elif hasattr(args, chiave) and getattr(args, chiave) in (None, "", [], False):
-                setattr(args, chiave, valore)
+    # ---- config file: i default dal file valgono solo per le opzioni NON
+    # passate esplicitamente a riga di comando ----
+    if getattr(args, "config", None):
+        _applica_config(args, _carica_config(args.config))
+
+    # ---- default finali per le opzioni mai impostate (né CLI né config) ----
+    _imposta_default(args)
 
     province = tuple(p.strip().upper() for p in args.province.split(",") if p.strip())
     os.makedirs(args.out, exist_ok=True)
